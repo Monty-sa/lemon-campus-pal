@@ -2353,6 +2353,30 @@ export function Planner({
           </div>
           <p className="footer-disclaimer">{t.common.footerDisclaimer}</p>
           <div className="footer-links">
+            <a
+              className="footer-link-btn"
+              href="https://github.com/Monty-sa/lemon-campus-pal"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t.common.githubLink}
+            >
+              <svg className="footer-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.87c-2.78.6-3.37-1.18-3.37-1.18-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.35 1.09 2.92.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.58 9.58 0 0 1 12 6.82a9.6 9.6 0 0 1 2.5.34c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.77c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" />
+              </svg>
+              {t.common.githubLink}
+            </a>
+            <a
+              className="footer-link-btn"
+              href="https://t.me/Muntadar26"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t.common.contactDeveloperLink}
+            >
+              <svg className="footer-link-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m21.4 3.6-3.1 16.1c-.23 1.14-.84 1.42-1.7.88l-4.74-3.5-2.29 2.2c-.25.25-.46.46-.95.46l.34-4.82 8.78-7.94c.38-.34-.08-.53-.59-.19L6.3 13.63l-4.67-1.46c-1.02-.32-1.04-1.02.21-1.51L20.1 3.62c.85-.31 1.59.19 1.3-.02Z" />
+              </svg>
+              {t.common.contactDeveloperLink}
+            </a>
             <button
               type="button"
               className="footer-link-btn"

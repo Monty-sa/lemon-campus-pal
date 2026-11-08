@@ -58,6 +58,8 @@ export interface CommonTranslations {
   viewOfficialSource: string;
   footerDisclaimer: string;
   footerTagline: string;
+  githubLink: string;
+  contactDeveloperLink: string;
   welcomeSetupNav: string;
   offlineResilienceTitle: string;
   offlineResilienceDesc: string;

@@ -3296,6 +3296,11 @@ footer {
 }
 .footer-links {
   margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2px 4px;
 }
 .footer-link-btn {
   background: none;
@@ -3307,9 +3312,22 @@ footer {
   padding: 4px 8px;
   border-radius: 4px;
   transition: color 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 .footer-link-btn:hover {
   color: var(--ink);
+}
+.footer-link-btn:focus-visible {
+  outline: 2px solid var(--lemon-dark);
+  outline-offset: 2px;
+}
+.footer-link-icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  fill: currentColor;
 }
 
 .settings-extra-actions {
