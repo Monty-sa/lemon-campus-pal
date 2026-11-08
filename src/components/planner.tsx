@@ -64,6 +64,8 @@ import { OnboardingModal } from "./onboarding-modal";
 import { RegistrationGuideModal } from "./registration-guide-modal";
 import { CourseDetailsModal } from "./course-details-modal";
 import { DataPrivacyModal } from "./data-privacy-modal";
+import { VERIFIED_ACADEMIC_EVENTS_1448 } from "@/data/academic-calendar";
+import { formatGregorianRange, getActiveOrUpcomingRegistrationEvent, getEventStatus } from "@/lib/academic-calendar";
 import dynamic from "next/dynamic";
 
 const AutoSchedulePanel = dynamic(() => import("./auto-schedule-panel").then((m) => m.AutoSchedulePanel));
@@ -263,6 +265,7 @@ export function Planner({
   });
   const [lang, setLang] = useState<Language>(() => getStoredLanguage());
   const t = useMemo(() => getTranslations(lang), [lang]);
+  const upcomingRegEvent = useMemo(() => getActiveOrUpcomingRegistrationEvent(VERIFIED_ACADEMIC_EVENTS_1448), []);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -1440,6 +1443,30 @@ export function Planner({
               <Icon name="copy"/> {t.planner.copyCrns}
             </button>
           </div>
+          {upcomingRegEvent && (
+            <div className="academic-deadline-banner" role="region" aria-label={t.regGuide.academicDeadlineLabel}>
+              <div className="deadline-content">
+                <span className="deadline-badge-icon" aria-hidden="true">📅</span>
+                <span className="deadline-status-tag">
+                  {getEventStatus(upcomingRegEvent) === "active" ? t.regGuide.eventStatusActive : t.regGuide.eventStatusUpcoming}
+                </span>
+                <span className="deadline-title">
+                  {lang === "ar" ? upcomingRegEvent.titleAr : upcomingRegEvent.titleEn}
+                </span>
+                <span className="deadline-dates">
+                  ({formatGregorianRange(upcomingRegEvent.startDate, upcomingRegEvent.endDate, lang)})
+                </span>
+              </div>
+              <a
+                href={upcomingRegEvent.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="deadline-official-link"
+              >
+                {t.regGuide.officialCalendarLink}
+              </a>
+            </div>
+          )}
         </section>
 
         <aside id="browse-courses-section" className="catalog full-width-catalog" aria-label={t.planner.browseSectionsTitle}>

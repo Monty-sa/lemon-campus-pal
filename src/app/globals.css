@@ -3498,6 +3498,176 @@ body, .topbar, .hero, .workspace, .catalog, .planner-panel, .course-group, .cour
   }
 }
 
+/* LEMON-047: Smart Academic Dates & Timetable Deadline Banner */
+.academic-deadline-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: var(--ink);
+  transition: border-color 0.15s ease;
+}
+
+.academic-deadline-banner:hover {
+  border-color: var(--brand-accent);
+}
+
+.deadline-content {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.deadline-badge-icon {
+  font-size: 14px;
+}
+
+.deadline-status-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+[data-theme="dark"] .deadline-status-tag {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.deadline-title {
+  font-weight: 700;
+}
+
+.deadline-dates {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.deadline-official-link {
+  color: var(--brand-accent);
+  font-weight: 700;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.deadline-official-link:hover {
+  text-decoration: underline;
+}
+
+/* Academic Dates List in Registration Guide */
+.academic-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.academic-event-card {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s ease;
+}
+
+.academic-event-card.status-active {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.04);
+}
+
+.academic-event-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.academic-event-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.academic-status-pill {
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.academic-status-pill.status-active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+[data-theme="dark"] .academic-status-pill.status-active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.academic-status-pill.status-upcoming {
+  background: var(--surface-active);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+.academic-status-pill.status-finished {
+  background: var(--surface-muted);
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.academic-event-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.academic-dates-footer {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+
+.academic-official-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-accent);
+  text-decoration: none;
+}
+
+.academic-official-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .academic-deadline-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* LEMON-022: Polished Footer */
 footer {
   margin-top: 48px;

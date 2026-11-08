@@ -574,6 +574,14 @@ export interface RegGuideTranslations {
   univRequirementsDesc: string;
   studyPlansLink: string;
   studyPlansDesc: string;
+  academicDatesTitle: string;
+  academicDatesDesc: string;
+  academicDatesSourceLink: string;
+  eventStatusActive: string;
+  eventStatusUpcoming: string;
+  eventStatusFinished: string;
+  academicDeadlineLabel: string;
+  officialCalendarLink: string;
 }
 
 export interface AutoScheduleTranslations {

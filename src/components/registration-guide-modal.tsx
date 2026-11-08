@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { Language, Translations } from "@/lib/i18n";
+import { VERIFIED_ACADEMIC_EVENTS_1448, KFU_OFFICIAL_CALENDAR_URL } from "@/data/academic-calendar";
+import { getEventStatus, formatGregorianRange } from "@/lib/academic-calendar";
 
 export interface RegistrationGuideModalProps {
   isOpen: boolean;
@@ -215,6 +217,60 @@ export function RegistrationGuideModal({
               <p className="final-exam-text">{t.regGuide.finalExamWarning}</p>
             </div>
           </div>
+
+          {/* Section: Official Academic Dates (1448 AH) */}
+          <details className="reg-guide-details academic-dates-details" open>
+            <summary className="reg-guide-summary">
+              <span className="reg-guide-summary-title">📅 {t.regGuide.academicDatesTitle}</span>
+            </summary>
+            <div className="reg-guide-details-content">
+              <p className="reg-guide-subtext">{t.regGuide.academicDatesDesc}</p>
+              <div className="academic-events-list">
+                {VERIFIED_ACADEMIC_EVENTS_1448.map((event) => {
+                  const status = getEventStatus(event);
+                  const statusLabel =
+                    status === "active"
+                      ? t.regGuide.eventStatusActive
+                      : status === "upcoming"
+                      ? t.regGuide.eventStatusUpcoming
+                      : t.regGuide.eventStatusFinished;
+
+                  return (
+                    <div key={event.id} className={`academic-event-card status-${status}`}>
+                      <div className="academic-event-header">
+                        <span className="academic-event-title">
+                          {lang === "ar" ? event.titleAr : event.titleEn}
+                        </span>
+                        <span className={`academic-status-pill status-${status}`}>
+                          {statusLabel}
+                        </span>
+                      </div>
+                      <div className="academic-event-meta">
+                        <span className="academic-date-gregorian">
+                          📅 {formatGregorianRange(event.startDate, event.endDate, lang)}
+                        </span>
+                        {event.startHijri && event.endHijri && (
+                          <span className="academic-date-hijri">
+                            🌙 {event.startHijri} – {event.endHijri}هـ
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="academic-dates-footer">
+                <a
+                  href={KFU_OFFICIAL_CALENDAR_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="academic-official-link"
+                >
+                  🔗 {t.regGuide.academicDatesSourceLink}
+                </a>
+              </div>
+            </div>
+          </details>
 
           {/* Section 7: Verified Official University Links */}
           <details className="reg-guide-details" open>
