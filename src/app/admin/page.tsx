@@ -13,6 +13,7 @@ import { getUptimeRobotStatus } from "@/lib/monitoring/uptimerobot";
 import { getBetterStackStatus } from "@/lib/monitoring/better-stack";
 import { getLogRocketStatus } from "@/lib/monitoring/logrocket";
 import { getNewRelicStatus } from "@/lib/monitoring/new-relic";
+import { getAudienceIntelligence } from "@/lib/analytics/engine";
 import { AdminCommandCenter } from "@/components/admin/AdminCommandCenter";
 import type { AdminDashboardData } from "@/components/admin/types";
 
@@ -162,12 +163,13 @@ export default async function AdminPage(props: AdminPageProps) {
 
   // 3. STATE C: Verified Owner Command Center
   const store = getSnapshotStore();
-  const [metadata, sentry, uptime, changesMale, changesFemale] = await Promise.all([
+  const [metadata, sentry, uptime, changesMale, changesFemale, audience] = await Promise.all([
     store.getMetadata(),
     getSentryIssueSummary(),
     getUptimeRobotStatus(),
     store.getSectionChanges("11"),
     store.getSectionChanges("12"),
+    getAudienceIntelligence("24h"),
   ]);
 
   const betterStack = getBetterStackStatus();
@@ -246,6 +248,7 @@ export default async function AdminPage(props: AdminPageProps) {
       isOwnerSubsConfigured: Boolean(process.env.ADMIN_OWNER_SUBS),
       ownerEmailsCount: getOwnerAllowlist().length,
     },
+    audience,
     systemInfo: {
       nodeVersion: process.version,
       environment: process.env.NODE_ENV ?? "production",

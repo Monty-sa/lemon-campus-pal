@@ -208,7 +208,14 @@ describe("LEMON-048A: Owner Control Center & Observability (/admin)", () => {
       expect(screen.getByText(/100% Free-Tier Compatible/i)).toBeInTheDocument();
       unmountInt();
 
-      // 5. Settings Tab
+      // 5. Audience Tab (LEMON-049A)
+      const audJsx = await AdminPage({ searchParams: Promise.resolve({ tab: "audience" }) });
+      const { unmount: unmountAud } = render(audJsx);
+      expect(screen.getByText(/Audience & Traffic Intelligence/i)).toBeInTheDocument();
+      expect(screen.getByText(/Counting Methodology & Privacy Attestation/i)).toBeInTheDocument();
+      unmountAud();
+
+      // 6. Settings Tab
       const setJsx = await AdminPage({ searchParams: Promise.resolve({ tab: "settings" }) });
       render(setJsx);
       expect(screen.getByText(/Preferences & System Configuration/i)).toBeInTheDocument();

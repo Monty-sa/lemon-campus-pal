@@ -134,6 +134,23 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               {isSentryConnected ? errors.statusMessage : (isAr ? "Sentry غير مربوط" : "Sentry not linked")}
             </div>
           </div>
+
+          {/* Compact Live Visitor Indicator (LEMON-049A) */}
+          <div className="cmd-stat-card">
+            <div className="cmd-stat-head">
+              <span className="cmd-stat-label">{t.activeVisitorsNow}</span>
+              <span className={`cmd-badge ${data.audience?.isConfigured && data.audience.live.activeVisitorsNow > 0 ? "success" : "neutral"}`}>
+                {data.audience?.isConfigured ? (isAr ? "مباشر" : "Live") : t.notConnected}
+              </span>
+            </div>
+            <div className={`cmd-stat-value ${data.audience?.isConfigured && data.audience.live.activeVisitorsNow > 0 ? "ok" : "muted"}`}>
+              {data.audience?.isConfigured ? data.audience.live.activeVisitorsNow : (isAr ? "غير متصل" : "Not connected")}
+            </div>
+            <div className="cmd-stat-sub">
+              <span className="cmd-pulse-dot" style={{ background: data.audience?.isConfigured ? "#22c55e" : "#9ca3af" }} />
+              <span>{isAr ? "نافذة نشاط 5 دقائق" : "5-min rolling window"}</span>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -1,3 +1,5 @@
+import type { AudienceIntelligenceData } from "@/lib/analytics/types";
+
 export interface AdminDashboardData {
   ownerSession: {
     email: string;
@@ -73,6 +75,7 @@ export interface AdminDashboardData {
     isOwnerSubsConfigured: boolean;
     ownerEmailsCount: number;
   };
+  audience: AudienceIntelligenceData;
   systemInfo: {
     nodeVersion: string;
     environment: string;

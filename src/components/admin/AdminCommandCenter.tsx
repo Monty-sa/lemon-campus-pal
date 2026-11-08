@@ -11,6 +11,7 @@ import { KfuDataTab } from "./tabs/KfuDataTab";
 import { PerformanceTab } from "./tabs/PerformanceTab";
 import { SecurityTab } from "./tabs/SecurityTab";
 import { AuditTab } from "./tabs/AuditTab";
+import { AudienceTab } from "./tabs/AudienceTab";
 import { IntegrationsTab } from "./tabs/IntegrationsTab";
 import { SettingsTab } from "./tabs/SettingsTab";
 
@@ -212,6 +213,7 @@ export const AdminCommandCenter: React.FC<AdminCommandCenterProps> = ({
                   {item.icon === "zap" && "⚡"}
                   {item.icon === "shield" && "🛡️"}
                   {item.icon === "list" && "⏱️"}
+                  {item.icon === "users" && "👥"}
                   {item.icon === "plug" && "🔌"}
                   {item.icon === "settings" && "⚙️"}
                 </span>
@@ -362,6 +364,15 @@ export const AdminCommandCenter: React.FC<AdminCommandCenterProps> = ({
             <AuditTab
               data={data}
               lang={lang}
+              formatTimestamp={formatTimestamp}
+            />
+          )}
+
+          {currentTab === "audience" && (
+            <AudienceTab
+              data={data}
+              lang={lang}
+              timezoneMode={timezoneMode}
               formatTimestamp={formatTimestamp}
             />
           )}
