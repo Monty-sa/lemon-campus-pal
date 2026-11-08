@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
+import { OAuth2Client } from "google-auth-library";
 
 export interface AdminSessionPayload {
   email: string;
@@ -10,10 +11,38 @@ export interface AdminSessionPayload {
   exp: number;
 }
 
+export interface VerifiedGoogleIdentity {
+  email: string;
+  sub: string;
+  name?: string;
+  picture?: string;
+  emailVerified: boolean;
+}
+
 export const ADMIN_SESSION_COOKIE_NAME = "lemon_admin_session";
 export const ADMIN_STATE_COOKIE_NAME = "lemon_admin_state";
 export const SESSION_TTL_SECONDS = 86400; // 24 hours
 export const STATE_TTL_SECONDS = 600; // 10 minutes
+
+/**
+ * Resolves the fixed trusted redirect origin for OAuth callbacks.
+ * Never trusts unvalidated client Host headers in production.
+ */
+export function getTrustedRedirectOrigin(): string {
+  // 1. Explicit override in env (e.g. custom domain or staging test)
+  if (process.env.ADMIN_ALLOWED_ORIGIN) {
+    return process.env.ADMIN_ALLOWED_ORIGIN.trim().replace(/\/$/, "");
+  }
+  // 2. Production Netlify URL or canonical production URL
+  if (process.env.NODE_ENV === "production") {
+    if (process.env.URL) {
+      return process.env.URL.trim().replace(/\/$/, "");
+    }
+    return "https://yourcampuspallemon.netlify.app";
+  }
+  // 3. Local development and test environments
+  return "http://localhost:3000";
+}
 
 /**
  * Checks if the required owner OAuth and session configuration is present.
@@ -40,10 +69,14 @@ export function getOwnerAllowlist(): string[] {
 }
 
 /**
- * Returns the optional list of allowed Google Sub IDs for stable identity enforcement.
+ * Returns the list of allowed Google Sub (Subject) IDs for immutable identity enforcement.
+ * Checks both ADMIN_OWNER_SUBS and ADMIN_GOOGLE_IDS.
  */
 export function getOwnerSubAllowlist(): string[] {
-  const raw = process.env.ADMIN_GOOGLE_IDS?.trim() || "";
+  const raw =
+    process.env.ADMIN_OWNER_SUBS?.trim() ||
+    process.env.ADMIN_GOOGLE_IDS?.trim() ||
+    "";
   if (!raw) return [];
   return raw
     .split(",")
@@ -53,6 +86,7 @@ export function getOwnerSubAllowlist(): string[] {
 
 /**
  * Verifies if an email and optional sub ID belong to the authorized owner allowlist.
+ * If owner subs are configured, the sub MUST be provided and must match.
  */
 export function isOwnerAuthorized(email: string, sub?: string): boolean {
   const allowlist = getOwnerAllowlist();
@@ -63,11 +97,58 @@ export function isOwnerAuthorized(email: string, sub?: string): boolean {
   if (!emailAllowed) return false;
 
   const subAllowlist = getOwnerSubAllowlist();
-  if (subAllowlist.length > 0 && sub) {
-    return subAllowlist.includes(sub);
+  if (subAllowlist.length > 0) {
+    if (!sub || !subAllowlist.includes(sub.trim())) {
+      return false;
+    }
   }
 
   return true;
+}
+
+/**
+ * Cryptographically verifies Google ID Token signature and claims using google-auth-library.
+ * Validates issuer, audience, expiration, and cryptographic signature against Google's public JWKS.
+ */
+export async function verifyGoogleIdToken(
+  idToken: string,
+  clientId: string,
+  clientOverride?: OAuth2Client,
+): Promise<VerifiedGoogleIdentity> {
+  const client = clientOverride ?? new OAuth2Client(clientId);
+
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: clientId,
+  });
+
+  const payload = ticket.getPayload();
+  if (!payload) {
+    throw new Error("Missing ID token payload");
+  }
+
+  if (!payload.email) {
+    throw new Error("Missing email in ID token payload");
+  }
+
+  if (!payload.sub) {
+    throw new Error("Missing subject (sub) in ID token payload");
+  }
+
+  const emailVerified =
+    payload.email_verified === true ||
+    (payload as unknown as Record<string, unknown>).email_verified === "true";
+  if (!emailVerified) {
+    throw new Error("Google email is not verified");
+  }
+
+  return {
+    email: payload.email,
+    sub: payload.sub,
+    name: payload.name,
+    picture: payload.picture,
+    emailVerified: true,
+  };
 }
 
 function getSessionSecret(): string {
@@ -101,7 +182,10 @@ export function createOAuthState(): { state: string; cookieValue: string } {
 /**
  * Verifies that the returned OAuth state is valid, correctly signed, and not expired.
  */
-export function verifyOAuthState(state: string | null | undefined, cookieState: string | null | undefined): boolean {
+export function verifyOAuthState(
+  state: string | null | undefined,
+  cookieState: string | null | undefined,
+): boolean {
   if (!state || !cookieState || state !== cookieState) return false;
 
   try {
@@ -130,7 +214,9 @@ export function verifyOAuthState(state: string | null | undefined, cookieState: 
 /**
  * Creates an HMAC-signed session token for the authenticated owner.
  */
-export function createAdminSessionToken(payload: Omit<AdminSessionPayload, "iat" | "exp">): string {
+export function createAdminSessionToken(
+  payload: Omit<AdminSessionPayload, "iat" | "exp">,
+): string {
   const secret = getSessionSecret();
   const now = Math.floor(Date.now() / 1000);
   const fullPayload: AdminSessionPayload = {
@@ -147,7 +233,9 @@ export function createAdminSessionToken(payload: Omit<AdminSessionPayload, "iat"
 /**
  * Validates and decodes an admin session token.
  */
-export function verifyAdminSessionToken(token: string | null | undefined): AdminSessionPayload | null {
+export function verifyAdminSessionToken(
+  token: string | null | undefined,
+): AdminSessionPayload | null {
   if (!token) return null;
 
   try {
@@ -186,7 +274,9 @@ export function verifyAdminSessionToken(token: string | null | undefined): Admin
 /**
  * Extracts and verifies the admin session from a Cookie header string.
  */
-export function getAdminSessionFromCookie(cookieHeader: string | null | undefined): AdminSessionPayload | null {
+export function getAdminSessionFromCookie(
+  cookieHeader: string | null | undefined,
+): AdminSessionPayload | null {
   if (!cookieHeader) return null;
 
   const cookies = cookieHeader.split(";").map((c) => c.trim());
@@ -220,7 +310,9 @@ export function clearSessionCookieString(): string {
  * Helper to authenticate incoming requests to /api/admin/* routes.
  * Fails closed with standard JSON error response and no-store headers.
  */
-export function verifyAdminRequest(req: Request):
+export function verifyAdminRequest(
+  req: Request,
+):
   | { session: AdminSessionPayload; errorResponse: null }
   | { session: null; errorResponse: NextResponse } {
   if (!isOwnerAuthConfigured()) {

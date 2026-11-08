@@ -40,14 +40,14 @@ export async function GET(req: Request) {
         name: auth.session.name,
       },
       overview: {
-        siteStatus: uptime.monitors[0]?.status ?? "healthy",
-        uptimeRatio: uptime.monitors[0]?.uptimeRatio ?? "100%",
+        siteStatus: uptime.isConfigured && uptime.monitors[0] ? uptime.monitors[0].status : "Not connected",
+        uptimeRatio: uptime.isConfigured && uptime.monitors[0] ? uptime.monitors[0].uptimeRatio : "Not connected",
         sourceHealth: metadata?.sourceHealth ?? "healthy",
         lastPublishedAt: metadata?.lastPublishedSnapshot ?? maleOfferings.importedAt,
         activeSnapshotVersion: metadata?.activeVersion ?? "144820-verified",
         maleCounts: { courses: maleCourses, sections: maleSections },
         femaleCounts: { courses: femaleCourses, sections: femaleSections },
-        unresolvedErrorsCount: sentry.issues.length,
+        unresolvedErrorsCount: sentry.isConfigured && sentry.apiConnected ? sentry.issues.length : "Not connected",
       },
       errors: {
         sentryConfigured: sentry.isConfigured,

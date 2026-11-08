@@ -1,12 +1,14 @@
+import crypto from "node:crypto";
+
 /**
- * LEMON Primary Error Tracking — Sentry Integration (LEMON-048)
+ * LEMON Primary Error Tracking — Sentry Integration (LEMON-048A)
  *
  * Privacy Guarantees:
  * - Guest schedules, plans, and CRNs are strictly scrubbed before reporting.
  * - GPA calculation grades, cumulative hours, and scenario data are NEVER sent.
  * - Sensitive HTTP headers (Authorization, Cookie, Session tokens) are redacted.
  * - Session replay is DISABLED by default to protect student privacy and avoid client bundle bloat.
- * - If Sentry DSN is missing, functions are cleanly inert.
+ * - When SENTRY_DSN is absent, functions are explicitly marked inactive.
  */
 
 export interface SentryIssueSummary {
@@ -30,6 +32,13 @@ export interface SentryStatus {
   statusMessage: string;
 }
 
+export interface SentryDeliveryResult {
+  delivered: boolean;
+  status: "delivered" | "inactive" | "failed";
+  eventId?: string;
+  error?: string;
+}
+
 const SENSITIVE_KEYS = new Set([
   "authorization",
   "cookie",
@@ -46,6 +55,24 @@ const SENSITIVE_KEYS = new Set([
   "gpa",
   "schedule",
 ]);
+
+/**
+ * Parses a standard Sentry DSN: https://<publicKey>@<host>/<projectId>
+ */
+export function parseSentryDsn(dsnString: string): { publicKey: string; host: string; projectId: string } | null {
+  try {
+    const url = new URL(dsnString);
+    const publicKey = url.username;
+    const host = url.host;
+    const pathParts = url.pathname.replace(/^\//, "").split("/");
+    const projectId = pathParts[0];
+
+    if (!publicKey || !host || !projectId) return null;
+    return { publicKey, host, projectId };
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Recursively scrubs PII and sensitive student scheduling data.
@@ -82,28 +109,73 @@ export function scrubSensitiveData<T>(input: T, depth = 0): T {
 }
 
 /**
- * Server-side error capture with automatic redaction.
+ * Genuine privacy-safe Sentry event capture delivering scrubbed exceptions
+ * to the Sentry Store API when SENTRY_DSN is configured.
+ * Explicitly marks integration inactive when DSN is absent.
  */
-export function captureException(error: unknown, context?: Record<string, unknown>): boolean {
+export async function captureException(
+  error: unknown,
+  context?: Record<string, unknown>,
+): Promise<SentryDeliveryResult> {
   const dsn = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
   if (!dsn) {
-    // Sentry not configured; return false cleanly
-    return false;
+    // Sentry is cleanly inactive when DSN is absent
+    return { delivered: false, status: "inactive" };
   }
 
-  const cleanContext = context ? scrubSensitiveData(context) : undefined;
+  const parsed = parseSentryDsn(dsn);
+  if (!parsed) {
+    return { delivered: false, status: "inactive", error: "Malformed SENTRY_DSN" };
+  }
+
+  const cleanContext = context ? scrubSensitiveData(context) : {};
   const errorObj = error instanceof Error ? error : new Error(String(error));
+  const eventId = crypto.randomUUID().replace(/-/g, "");
+  const timestamp = new Date().toISOString();
 
-  // Log in safe redacted format
-  if (process.env.NODE_ENV !== "test") {
-    console.error("[SENTRY_CAPTURE]", {
-      message: errorObj.message,
-      name: errorObj.name,
-      context: cleanContext,
+  const payload = {
+    event_id: eventId,
+    timestamp,
+    platform: "javascript",
+    level: "error",
+    logger: "lemon.runtime",
+    release: process.env.NEXT_PUBLIC_RELEASE_VERSION || "lemon-048a",
+    environment: process.env.NODE_ENV || "production",
+    exception: {
+      values: [
+        {
+          type: errorObj.name || "Error",
+          value: errorObj.message,
+        },
+      ],
+    },
+    extra: cleanContext,
+  };
+
+  try {
+    const storeUrl = `https://${parsed.host}/api/${parsed.projectId}/store/`;
+    const res = await fetch(storeUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Sentry-Auth": `Sentry sentry_version=7, sentry_client=lemon-client/1.0, sentry_key=${parsed.publicKey}`,
+      },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(4000),
     });
-  }
 
-  return true;
+    if (!res.ok) {
+      return { delivered: false, status: "failed", error: `Sentry returned HTTP ${res.status}` };
+    }
+
+    return { delivered: true, status: "delivered", eventId };
+  } catch (err: unknown) {
+    return {
+      delivered: false,
+      status: "failed",
+      error: err instanceof Error ? err.message : "Network error contacting Sentry",
+    };
+  }
 }
 
 /**
@@ -117,7 +189,7 @@ export async function getSentryIssueSummary(): Promise<SentryStatus> {
   const project = process.env.SENTRY_PROJECT?.trim();
 
   const environment = process.env.NODE_ENV || "production";
-  const release = process.env.NEXT_PUBLIC_RELEASE_VERSION || "lemon-048";
+  const release = process.env.NEXT_PUBLIC_RELEASE_VERSION || "lemon-048a";
 
   if (!dsn) {
     return {
@@ -137,7 +209,7 @@ export async function getSentryIssueSummary(): Promise<SentryStatus> {
       release,
       apiConnected: false,
       issues: [],
-      statusMessage: "Sentry SDK active. To view issue feed in dashboard, configure SENTRY_AUTH_TOKEN, SENTRY_ORG, and SENTRY_PROJECT in Netlify.",
+      statusMessage: "Sentry DSN configured. To view issue feed in dashboard, configure SENTRY_AUTH_TOKEN, SENTRY_ORG, and SENTRY_PROJECT in Netlify.",
     };
   }
 

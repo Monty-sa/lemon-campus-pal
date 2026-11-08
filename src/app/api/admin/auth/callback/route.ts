@@ -5,32 +5,12 @@ import {
   isOwnerAuthorized,
   createAdminSessionToken,
   createSessionCookieString,
+  getTrustedRedirectOrigin,
+  verifyGoogleIdToken,
   ADMIN_STATE_COOKIE_NAME,
 } from "@/lib/admin/auth";
 
 export const dynamic = "force-dynamic";
-
-interface GoogleIdTokenPayload {
-  iss?: string;
-  aud?: string;
-  sub?: string;
-  email?: string;
-  email_verified?: boolean | string;
-  name?: string;
-  picture?: string;
-  exp?: number;
-}
-
-function parseJwtPayload(token: string): GoogleIdTokenPayload | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const decoded = Buffer.from(parts[1], "base64url").toString("utf8");
-    return JSON.parse(decoded) as GoogleIdTokenPayload;
-  } catch {
-    return null;
-  }
-}
 
 export async function GET(req: Request) {
   const reqUrl = new URL(req.url);
@@ -58,10 +38,10 @@ export async function GET(req: Request) {
 
   const clientId = process.env.ADMIN_GOOGLE_CLIENT_ID!.trim();
   const clientSecret = process.env.ADMIN_GOOGLE_CLIENT_SECRET!.trim();
-  const redirectUri = `${reqUrl.origin}/api/admin/auth/callback`;
+  const redirectUri = `${getTrustedRedirectOrigin()}/api/admin/auth/callback`;
 
   try {
-    // 2. Exchange code for Google tokens
+    // 2. Exchange authorization code for Google tokens
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -83,46 +63,20 @@ export async function GET(req: Request) {
       return NextResponse.redirect(new URL("/admin?error=missing_id_token", req.url));
     }
 
-    // 3. Validate ID Token claims
-    const payload = parseJwtPayload(tokenData.id_token);
-    if (!payload || !payload.email || !payload.sub) {
-      return NextResponse.redirect(new URL("/admin?error=invalid_token_payload", req.url));
-    }
+    // 3. Cryptographically verify Google ID Token (signature, aud, iss, exp, email_verified)
+    const verifiedIdentity = await verifyGoogleIdToken(tokenData.id_token, clientId);
 
-    // Issuer check
-    const validIssuers = ["https://accounts.google.com", "accounts.google.com"];
-    if (!payload.iss || !validIssuers.includes(payload.iss)) {
-      return NextResponse.redirect(new URL("/admin?error=invalid_issuer", req.url));
-    }
-
-    // Audience check
-    if (payload.aud !== clientId) {
-      return NextResponse.redirect(new URL("/admin?error=invalid_audience", req.url));
-    }
-
-    // Email verification check
-    const emailVerified = payload.email_verified === true || payload.email_verified === "true";
-    if (!emailVerified) {
-      return NextResponse.redirect(new URL("/admin?error=email_not_verified", req.url));
-    }
-
-    // Expiration check
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp && payload.exp < now) {
-      return NextResponse.redirect(new URL("/admin?error=token_expired", req.url));
-    }
-
-    // 4. Strict Owner Allowlist Authorization
-    if (!isOwnerAuthorized(payload.email, payload.sub)) {
+    // 4. Strict Owner Identity Authorization (Both Email and Google Subject Sub)
+    if (!isOwnerAuthorized(verifiedIdentity.email, verifiedIdentity.sub)) {
       return NextResponse.redirect(new URL("/admin?error=access_denied", req.url));
     }
 
     // 5. Issue HMAC-signed Owner Session
     const sessionToken = createAdminSessionToken({
-      email: payload.email,
-      sub: payload.sub,
-      name: payload.name,
-      picture: payload.picture,
+      email: verifiedIdentity.email,
+      sub: verifiedIdentity.sub,
+      name: verifiedIdentity.name,
+      picture: verifiedIdentity.picture,
     });
 
     const isProd = process.env.NODE_ENV === "production";
@@ -138,6 +92,6 @@ export async function GET(req: Request) {
 
     return response;
   } catch {
-    return NextResponse.redirect(new URL("/admin?error=oauth_error", req.url));
+    return NextResponse.redirect(new URL("/admin?error=invalid_token", req.url));
   }
 }

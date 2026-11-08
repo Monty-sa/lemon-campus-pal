@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { scrubSensitiveData, captureException, getSentryIssueSummary } from "./sentry";
+import { scrubSensitiveData, captureException, getSentryIssueSummary, parseSentryDsn } from "./sentry";
 import { getUptimeRobotStatus } from "./uptimerobot";
 import { getBetterStackStatus, sendBetterStackHeartbeat } from "./better-stack";
 import { getLogRocketStatus } from "./logrocket";
 import { getNewRelicStatus } from "./new-relic";
 import { GET as getHealthApi } from "@/app/api/health/route";
 
-describe("LEMON-048: Monitoring Integrations & Privacy Guarantees", () => {
+describe("LEMON-048A: Monitoring Integrations & Privacy Guarantees", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe("LEMON-048: Monitoring Integrations & Privacy Guarantees", () => {
     process.env = originalEnv;
   });
 
-  describe("Sentry Privacy & Redaction", () => {
+  describe("Sentry Privacy & Genuine Delivery", () => {
     it("redacts student plans, CRNs, courses, and GPA grades from error contexts", () => {
       const rawContext = {
         component: "WeeklyCalendar",
@@ -43,15 +43,61 @@ describe("LEMON-048: Monitoring Integrations & Privacy Guarantees", () => {
       expect(scrubbed.component).toBe("WeeklyCalendar");
     });
 
-    it("safely ignores captureException when SENTRY_DSN is not configured", () => {
+    it("parses valid and invalid Sentry DSN formats", () => {
+      const parsed = parseSentryDsn("https://myPublicKey@o12345.ingest.sentry.io/4507890");
+      expect(parsed).not.toBeNull();
+      expect(parsed?.publicKey).toBe("myPublicKey");
+      expect(parsed?.host).toBe("o12345.ingest.sentry.io");
+      expect(parsed?.projectId).toBe("4507890");
+
+      expect(parseSentryDsn("invalid-dsn")).toBeNull();
+    });
+
+    it("explicitly returns inactive status when SENTRY_DSN is not configured", async () => {
       delete process.env.SENTRY_DSN;
       delete process.env.NEXT_PUBLIC_SENTRY_DSN;
 
-      const captured = captureException(new Error("Test error"));
-      expect(captured).toBe(false);
+      const result = await captureException(new Error("Test error"));
+      expect(result.delivered).toBe(false);
+      expect(result.status).toBe("inactive");
     });
 
-    it("reports Setup Required when SENTRY_DSN is absent", async () => {
+    it("delivers genuine privacy-safe event payload to Sentry Store API when configured", async () => {
+      process.env.SENTRY_DSN = "https://testkey@o9999.ingest.sentry.io/123456";
+
+      const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      vi.stubGlobal("fetch", mockFetch);
+
+      const result = await captureException(new Error("Database connection timeout"), {
+        component: "SnapshotStore",
+        plans: [{ id: "secret-plan" }],
+        retryCount: 2,
+      });
+
+      expect(result.delivered).toBe(true);
+      expect(result.status).toBe("delivered");
+      expect(result.eventId).toBeTruthy();
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://o9999.ingest.sentry.io/api/123456/store/",
+        expect.objectContaining({
+          method: "POST",
+          headers: expect.objectContaining({
+            "X-Sentry-Auth": expect.stringContaining("sentry_key=testkey"),
+          }),
+        }),
+      );
+
+      // Verify payload body has scrubbed data
+      const sentBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(sentBody.exception.values[0].value).toBe("Database connection timeout");
+      expect(sentBody.extra.plans).toBe("[REDACTED]");
+      expect(sentBody.extra.retryCount).toBe(2);
+
+      vi.unstubAllGlobals();
+    });
+
+    it("reports Setup Required when SENTRY_DSN is absent and never invents fake counts", async () => {
       delete process.env.SENTRY_DSN;
       delete process.env.NEXT_PUBLIC_SENTRY_DSN;
 
@@ -62,7 +108,7 @@ describe("LEMON-048: Monitoring Integrations & Privacy Guarantees", () => {
     });
   });
 
-  describe("UptimeRobot Public Availability", () => {
+  describe("UptimeRobot Public Availability & Truthfulness", () => {
     it("provides safe public health endpoint (/api/health) with no-store headers", async () => {
       const res = await getHealthApi();
       expect(res.status).toBe(200);
@@ -74,12 +120,13 @@ describe("LEMON-048: Monitoring Integrations & Privacy Guarantees", () => {
       expect(res.headers.get("cache-control")).toContain("no-store");
     });
 
-    it("returns Ready for Setup when UPTIMEROBOT_API_KEY is not configured", async () => {
+    it("reports Ready for Setup without claiming 100% uptime when API key is missing", async () => {
       delete process.env.UPTIMEROBOT_API_KEY;
 
       const status = await getUptimeRobotStatus();
       expect(status.isConfigured).toBe(false);
       expect(status.statusMessage).toContain("Ready for Setup");
+      expect(status.monitors).toHaveLength(0);
       expect(status.recommendedConfig.targetUrl).toContain("/api/health");
       expect(status.recommendedConfig.intervalMinutes).toBe(5);
     });

@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { isOwnerAuthConfigured, createOAuthState, ADMIN_STATE_COOKIE_NAME, STATE_TTL_SECONDS } from "@/lib/admin/auth";
+import {
+  isOwnerAuthConfigured,
+  createOAuthState,
+  getTrustedRedirectOrigin,
+  ADMIN_STATE_COOKIE_NAME,
+  STATE_TTL_SECONDS,
+} from "@/lib/admin/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -10,8 +16,7 @@ export async function GET(req: Request) {
   }
 
   const clientId = process.env.ADMIN_GOOGLE_CLIENT_ID!.trim();
-  const reqUrl = new URL(req.url);
-  const redirectUri = `${reqUrl.origin}/api/admin/auth/callback`;
+  const redirectUri = `${getTrustedRedirectOrigin()}/api/admin/auth/callback`;
 
   const { state, cookieValue } = createOAuthState();
 

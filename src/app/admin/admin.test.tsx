@@ -9,7 +9,7 @@ vi.mock("next/headers", () => ({
   headers: vi.fn(),
 }));
 
-describe("LEMON-048: Owner Control Center & Observability (/admin)", () => {
+describe("LEMON-048A: Owner Control Center & Observability (/admin)", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -22,11 +22,12 @@ describe("LEMON-048: Owner Control Center & Observability (/admin)", () => {
   });
 
   describe("Fail-Closed Behavior When Unconfigured", () => {
-    it("renders setup required instructions when environment variables are missing", async () => {
+    it("renders setup required instructions with sub allowlist when environment variables are missing", async () => {
       delete process.env.ADMIN_GOOGLE_CLIENT_ID;
       delete process.env.ADMIN_GOOGLE_CLIENT_SECRET;
       delete process.env.ADMIN_SESSION_SECRET;
       delete process.env.ADMIN_OWNER_EMAILS;
+      delete process.env.ADMIN_OWNER_SUBS;
 
       vi.mocked(nextHeaders.headers).mockResolvedValue(new Headers());
 
@@ -39,6 +40,7 @@ describe("LEMON-048: Owner Control Center & Observability (/admin)", () => {
       expect(screen.getByText("ADMIN_GOOGLE_CLIENT_SECRET")).toBeInTheDocument();
       expect(screen.getByText("ADMIN_SESSION_SECRET")).toBeInTheDocument();
       expect(screen.getByText("ADMIN_OWNER_EMAILS")).toBeInTheDocument();
+      expect(screen.getByText("ADMIN_OWNER_SUBS")).toBeInTheDocument();
       expect(screen.getByRole("link", { name: "Return to Student Planner" })).toBeInTheDocument();
     });
 
@@ -61,6 +63,7 @@ describe("LEMON-048: Owner Control Center & Observability (/admin)", () => {
       process.env.ADMIN_GOOGLE_CLIENT_SECRET = "test-client-secret";
       process.env.ADMIN_SESSION_SECRET = "secret-key-at-least-32-bytes-long-here!!";
       process.env.ADMIN_OWNER_EMAILS = "owner@example.com";
+      process.env.ADMIN_OWNER_SUBS = "google-sub-12345";
     });
 
     it("renders Google OAuth sign-in button when no session cookie is present", async () => {
@@ -94,15 +97,16 @@ describe("LEMON-048: Owner Control Center & Observability (/admin)", () => {
     });
   });
 
-  describe("Authenticated Owner Control Center", () => {
+  describe("Authenticated Owner Control Center & Truthful Metrics", () => {
     beforeEach(() => {
       process.env.ADMIN_GOOGLE_CLIENT_ID = "test-client-id";
       process.env.ADMIN_GOOGLE_CLIENT_SECRET = "test-client-secret";
       process.env.ADMIN_SESSION_SECRET = "secret-key-at-least-32-bytes-long-here!!";
       process.env.ADMIN_OWNER_EMAILS = "owner@example.com";
+      process.env.ADMIN_OWNER_SUBS = "google-sub-12345";
     });
 
-    it("renders all four operational areas for verified owner session", async () => {
+    it("renders all four operational areas and truthfully displays Not connected for unconfigured providers", async () => {
       const token = createAdminSessionToken({
         email: "owner@example.com",
         sub: "google-sub-12345",
@@ -121,10 +125,13 @@ describe("LEMON-048: Owner Control Center & Observability (/admin)", () => {
       expect(screen.getByText("owner@example.com")).toBeInTheDocument();
       expect(screen.getByRole("link", { name: "Sign Out" })).toHaveAttribute("href", "/api/admin/auth/logout");
 
-      // Area 1: System Overview & Availability
+      // Area 1: System Overview & Availability — Truthful metrics (no fake 100% or 0)
       expect(screen.getByRole("heading", { name: /System Overview & Availability/i })).toBeInTheDocument();
       expect(screen.getByText("Public Site Uptime")).toBeInTheDocument();
       expect(screen.getByText("Male / Female Sections")).toBeInTheDocument();
+      // Unconfigured UptimeRobot & Sentry must show "Not connected"
+      const notConnectedBadges = screen.getAllByText("Not connected");
+      expect(notConnectedBadges.length).toBeGreaterThanOrEqual(2);
 
       // Area 2: Error Monitoring (Sentry)
       expect(screen.getByRole("heading", { name: /Error Monitoring \(Sentry\)/i })).toBeInTheDocument();
@@ -142,7 +149,7 @@ describe("LEMON-048: Owner Control Center & Observability (/admin)", () => {
     });
   });
 
-  describe("API Route Authorization (/api/admin/metrics)", () => {
+  describe("API Route Authorization & Truthful Metrics (/api/admin/metrics)", () => {
     it("returns 503 when owner authentication is unconfigured", async () => {
       delete process.env.ADMIN_GOOGLE_CLIENT_ID;
       const req = new Request("https://lemon.test/api/admin/metrics");
@@ -169,11 +176,14 @@ describe("LEMON-048: Owner Control Center & Observability (/admin)", () => {
       expect(res.headers.get("cache-control")).toContain("no-store");
     });
 
-    it("returns 200 with operational metrics when valid owner session is provided", async () => {
+    it("returns 200 with truthful metrics (Not connected for unconfigured monitors)", async () => {
       process.env.ADMIN_GOOGLE_CLIENT_ID = "id";
       process.env.ADMIN_GOOGLE_CLIENT_SECRET = "secret";
       process.env.ADMIN_SESSION_SECRET = "secret-key-at-least-32-bytes-long-here!!";
       process.env.ADMIN_OWNER_EMAILS = "owner@example.com";
+      process.env.ADMIN_OWNER_SUBS = "google-sub-12345";
+      delete process.env.UPTIMEROBOT_API_KEY;
+      delete process.env.SENTRY_AUTH_TOKEN;
 
       const token = createAdminSessionToken({
         email: "owner@example.com",
@@ -193,6 +203,8 @@ describe("LEMON-048: Owner Control Center & Observability (/admin)", () => {
       expect(data.ownerSession.email).toBe("owner@example.com");
       expect(data.overview.maleCounts.sections).toBeGreaterThan(0);
       expect(data.overview.femaleCounts.sections).toBeGreaterThan(0);
+      expect(data.overview.uptimeRatio).toBe("Not connected");
+      expect(data.overview.unresolvedErrorsCount).toBe("Not connected");
       expect(data.kfuRefresh.refreshSource).toBe("windows_worker");
       expect(data.performance.coreWebVitalsTargets.lcp).toContain("1.5s");
       expect(res.headers.get("cache-control")).toContain("no-store");

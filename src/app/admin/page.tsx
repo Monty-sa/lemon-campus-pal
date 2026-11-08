@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import {
   isOwnerAuthConfigured,
   getAdminSessionFromCookie,
+  getTrustedRedirectOrigin,
 } from "@/lib/admin/auth";
 import { getSnapshotStore } from "@/lib/kfu-monitor/storage";
 import { maleOfferings, femaleOfferings } from "@/data/offerings";
@@ -26,9 +27,6 @@ export default async function AdminPage(props: AdminPageProps) {
 
   const headerList = await headers();
   const cookieHeader = headerList.get("cookie");
-  const host = headerList.get("host") || "yourcampuspallemon.netlify.app";
-  const protocol = host.includes("localhost") ? "http" : "https";
-  const origin = `${protocol}://${host}`;
 
   // 1. STATE A: Configuration Missing (Fail Closed)
   if (!isOwnerAuthConfigured()) {
@@ -62,11 +60,15 @@ export default async function AdminPage(props: AdminPageProps) {
                 <code>ADMIN_OWNER_EMAILS</code>
                 <span>{isAr ? "قائمة بريد إلكتروني مفصولة بفواصل لحسابات المالك المعتمدة فقط" : "Comma-separated allowlist of verified owner Google email addresses"}</span>
               </li>
+              <li>
+                <code>ADMIN_OWNER_SUBS</code>
+                <span>{isAr ? "معرفات Google Subject (sub) الثابتة للمالكين لربط الهوية بأمان تام" : "Allowlist of verified Google Subject (sub) IDs for immutable owner identity binding"}</span>
+              </li>
             </ul>
 
             <div className="setup-redirect-note">
               <strong>{isAr ? "رابط إعادة التوجيه المعتمد (Authorized Redirect URI):" : "Authorized Redirect URI:"}</strong>
-              <pre><code>{origin}/api/admin/auth/callback</code></pre>
+              <pre><code>{getTrustedRedirectOrigin()}/api/admin/auth/callback</code></pre>
             </div>
           </div>
 
@@ -203,8 +205,10 @@ export default async function AdminPage(props: AdminPageProps) {
           <div className="metrics-grid">
             <div className="metric-card">
               <span className="metric-label">{isAr ? "جاهزية الموقع" : "Public Site Uptime"}</span>
-              <span className="metric-value status-ok">{uptime.monitors[0]?.uptimeRatio ?? "100%"}</span>
-              <span className="metric-sub">{uptime.isConfigured ? (isAr ? "مراقب عبر UptimeRobot" : "Monitored via UptimeRobot") : (isAr ? "الخدمة تعمل محلياً" : "Edge HTTP 200 OK")}</span>
+              <span className={`metric-value ${uptime.isConfigured && uptime.monitors.length > 0 ? "status-ok" : "status-muted"}`}>
+                {uptime.isConfigured && uptime.monitors.length > 0 ? uptime.monitors[0].uptimeRatio : (isAr ? "غير متصل" : "Not connected")}
+              </span>
+              <span className="metric-sub">{uptime.isConfigured ? (isAr ? "مراقب عبر UptimeRobot" : "Monitored via UptimeRobot") : (isAr ? "UptimeRobot غير مهيّأ" : "UptimeRobot not configured")}</span>
             </div>
             <div className="metric-card">
               <span className="metric-label">{isAr ? "آخر نشر للبيانات" : "Latest KFU Publication"}</span>
@@ -218,10 +222,10 @@ export default async function AdminPage(props: AdminPageProps) {
             </div>
             <div className="metric-card">
               <span className="metric-label">{isAr ? "الأخطاء النشطة (24 ساعة)" : "Unresolved Issues (24h)"}</span>
-              <span className={`metric-value ${sentry.issues.length > 0 ? "status-warn" : "status-ok"}`}>
-                {sentry.apiConnected ? sentry.issues.length : "0"}
+              <span className={`metric-value ${sentry.isConfigured && sentry.apiConnected ? (sentry.issues.length > 0 ? "status-warn" : "status-ok") : "status-muted"}`}>
+                {sentry.isConfigured && sentry.apiConnected ? sentry.issues.length : (isAr ? "غير متصل" : "Not connected")}
               </span>
-              <span className="metric-sub">{sentry.isConfigured ? sentry.statusMessage : (isAr ? "Sentry غير مربوط" : "Sentry not linked")}</span>
+              <span className="metric-sub">{sentry.isConfigured && sentry.apiConnected ? sentry.statusMessage : (isAr ? "Sentry غير مربوط" : "Sentry not linked")}</span>
             </div>
           </div>
         </section>

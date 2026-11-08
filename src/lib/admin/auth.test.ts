@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   isOwnerAuthConfigured,
   getOwnerAllowlist,
+  getOwnerSubAllowlist,
   isOwnerAuthorized,
   createOAuthState,
   verifyOAuthState,
@@ -9,13 +10,17 @@ import {
   verifyAdminSessionToken,
   getAdminSessionFromCookie,
   verifyAdminRequest,
+  getTrustedRedirectOrigin,
+  verifyGoogleIdToken,
   ADMIN_SESSION_COOKIE_NAME,
 } from "./auth";
+import type { OAuth2Client } from "google-auth-library";
 
-describe("LEMON-048: Owner Authentication & Session Security", () => {
+describe("LEMON-048A: Secure Owner Auth & Identity Verification", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
+    vi.clearAllMocks();
     process.env = { ...originalEnv };
   });
 
@@ -51,12 +56,110 @@ describe("LEMON-048: Owner Authentication & Session Security", () => {
       expect(isOwnerAuthorized("stranger@example.com")).toBe(false);
     });
 
-    it("supports optional Google Sub ID verification when configured", () => {
+    it("strictly binds owner authorization to allowlisted Google subject (sub)", () => {
       process.env.ADMIN_OWNER_EMAILS = "owner@example.com";
-      process.env.ADMIN_GOOGLE_IDS = "112233445566778899";
+      process.env.ADMIN_OWNER_SUBS = "109876543210987654321, 209876543210987654321";
 
-      expect(isOwnerAuthorized("owner@example.com", "112233445566778899")).toBe(true);
-      expect(isOwnerAuthorized("owner@example.com", "wrong-sub-id")).toBe(false);
+      expect(getOwnerSubAllowlist()).toEqual(["109876543210987654321", "209876543210987654321"]);
+
+      // Matching email AND matching sub -> authorized
+      expect(isOwnerAuthorized("owner@example.com", "109876543210987654321")).toBe(true);
+      expect(isOwnerAuthorized("owner@example.com", "209876543210987654321")).toBe(true);
+
+      // Matching email BUT wrong sub -> REJECTED
+      expect(isOwnerAuthorized("owner@example.com", "wrong-attacker-sub")).toBe(false);
+
+      // Matching email BUT missing sub -> REJECTED
+      expect(isOwnerAuthorized("owner@example.com", undefined)).toBe(false);
+      expect(isOwnerAuthorized("owner@example.com", "")).toBe(false);
+
+      // Wrong email even with matching sub -> REJECTED
+      expect(isOwnerAuthorized("impostor@example.com", "109876543210987654321")).toBe(false);
+    });
+  });
+
+  describe("Fixed Configured Redirect Origin", () => {
+    it("uses ADMIN_ALLOWED_ORIGIN when explicitly configured", () => {
+      process.env.ADMIN_ALLOWED_ORIGIN = "https://custom.admin.lemon.sa/";
+      expect(getTrustedRedirectOrigin()).toBe("https://custom.admin.lemon.sa");
+    });
+
+    it("uses production URL or fixed Netlify domain in production mode", () => {
+      delete process.env.ADMIN_ALLOWED_ORIGIN;
+      (process.env as Record<string, string | undefined>).NODE_ENV = "production";
+      process.env.URL = "https://yourcampuspallemon.netlify.app";
+
+      expect(getTrustedRedirectOrigin()).toBe("https://yourcampuspallemon.netlify.app");
+    });
+
+    it("falls back to localhost:3000 in local development", () => {
+      delete process.env.ADMIN_ALLOWED_ORIGIN;
+      (process.env as Record<string, string | undefined>).NODE_ENV = "development";
+      delete process.env.URL;
+
+      expect(getTrustedRedirectOrigin()).toBe("http://localhost:3000");
+    });
+  });
+
+  describe("Cryptographic ID Token Verification (verifyGoogleIdToken)", () => {
+    it("successfully validates signed ID token claims via google-auth-library", async () => {
+      const mockPayload = {
+        iss: "https://accounts.google.com",
+        aud: "my-client-id",
+        sub: "google-sub-12345",
+        email: "owner@example.com",
+        email_verified: true,
+        name: "Lemon Admin",
+        picture: "https://example.com/avatar.png",
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      };
+
+      const mockClient = {
+        verifyIdToken: vi.fn().mockResolvedValue({
+          getPayload: () => mockPayload,
+        }),
+      } as unknown as OAuth2Client;
+
+      const identity = await verifyGoogleIdToken("valid-id-token", "my-client-id", mockClient);
+
+      expect(mockClient.verifyIdToken).toHaveBeenCalledWith({
+        idToken: "valid-id-token",
+        audience: "my-client-id",
+      });
+      expect(identity.email).toBe("owner@example.com");
+      expect(identity.sub).toBe("google-sub-12345");
+      expect(identity.name).toBe("Lemon Admin");
+      expect(identity.emailVerified).toBe(true);
+    });
+
+    it("rejects ID tokens with unverified email addresses", async () => {
+      const mockPayload = {
+        iss: "https://accounts.google.com",
+        aud: "my-client-id",
+        sub: "google-sub-12345",
+        email: "unverified@example.com",
+        email_verified: false,
+      };
+
+      const mockClient = {
+        verifyIdToken: vi.fn().mockResolvedValue({
+          getPayload: () => mockPayload,
+        }),
+      } as unknown as OAuth2Client;
+
+      await expect(verifyGoogleIdToken("unverified-token", "my-client-id", mockClient)).rejects.toThrow(
+        "Google email is not verified",
+      );
+    });
+
+    it("rejects ID tokens when google-auth-library throws signature mismatch or expired token", async () => {
+      const mockClient = {
+        verifyIdToken: vi.fn().mockRejectedValue(new Error("Invalid token signature")),
+      } as unknown as OAuth2Client;
+
+      await expect(verifyGoogleIdToken("forged-token", "my-client-id", mockClient)).rejects.toThrow(
+        "Invalid token signature",
+      );
     });
   });
 
@@ -91,9 +194,10 @@ describe("LEMON-048: Owner Authentication & Session Security", () => {
     beforeEach(() => {
       process.env.ADMIN_SESSION_SECRET = "test-session-secret-key-123456789";
       process.env.ADMIN_OWNER_EMAILS = "owner@example.com";
+      process.env.ADMIN_OWNER_SUBS = "google-sub-12345";
     });
 
-    it("creates and verifies valid session token", () => {
+    it("creates and verifies valid session token with email and sub matching allowlist", () => {
       const token = createAdminSessionToken({
         email: "owner@example.com",
         sub: "google-sub-12345",
@@ -107,18 +211,27 @@ describe("LEMON-048: Owner Authentication & Session Security", () => {
       expect(session?.name).toBe("Lemon Owner");
     });
 
-    it("rejects session if email is not on owner allowlist", () => {
+    it("rejects session if sub does not match allowlist", () => {
       const token = createAdminSessionToken({
-        email: "unauthorized@example.com",
-        sub: "google-sub-99999",
+        email: "owner@example.com",
+        sub: "unauthorized-sub-99999",
       });
 
-      // Verification must fail because email is not in ADMIN_OWNER_EMAILS
       const session = verifyAdminSessionToken(token);
       expect(session).toBeNull();
     });
 
-    it("rejects token with invalid signature", () => {
+    it("rejects session if email is not on owner allowlist", () => {
+      const token = createAdminSessionToken({
+        email: "unauthorized@example.com",
+        sub: "google-sub-12345",
+      });
+
+      const session = verifyAdminSessionToken(token);
+      expect(session).toBeNull();
+    });
+
+    it("rejects token with invalid signature or session tampering", () => {
       const token = createAdminSessionToken({
         email: "owner@example.com",
         sub: "google-sub-12345",
