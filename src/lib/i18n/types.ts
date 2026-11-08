@@ -546,6 +546,34 @@ export interface RegGuideTranslations {
   daysTitle: string;
   daysDesc: string;
   daysMap: { code: string; name: string; en: string }[];
+  cohortCodesTitle: string;
+  cohortCodesDesc: string;
+  cohortFilterAll: string;
+  cohortFilter2021Later: string;
+  cohortFilter2020Earlier: string;
+  cohort2021EnglishTrack: string;
+  cohort2021EnglishCodes: string;
+  cohort2021ArabicTrack: string;
+  cohort2021ArabicCodes: string;
+  cohort2020ArabicTrack: string;
+  cohort2020ArabicCodes: string;
+  cohort2020EnglishTrack: string;
+  cohort2020EnglishCodes: string;
+  cohortCodesAdvisoryNote: string;
+  electivesTitle: string;
+  electivesDesc: string;
+  elective2022EnglishTrack: string;
+  elective2022EnglishRule: string;
+  elective2021ArabicTrack: string;
+  elective2021ArabicRule: string;
+  electivesScopeNote: string;
+  finalExamTitle: string;
+  finalExamWarning: string;
+  officialLinksTitle: string;
+  univRequirementsLink: string;
+  univRequirementsDesc: string;
+  studyPlansLink: string;
+  studyPlansDesc: string;
 }
 
 export interface AutoScheduleTranslations {

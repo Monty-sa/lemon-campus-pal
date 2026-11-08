@@ -182,9 +182,7 @@ describe("LEMON-022: Polished Footer Tagline & Disclaimer", () => {
     });
 
     expect(screen.getByText("Made by a KFU student, for KFU students. 🍋")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Independent student project — not affiliated with or endorsed by King Faisal University/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText("Student effort, not official.")).toBeInTheDocument();
   });
 });
 

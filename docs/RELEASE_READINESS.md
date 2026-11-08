@@ -1,3 +1,45 @@
+# LEMON-045 KFU Registration Guide Update Release Gate
+
+**Decision (2026-11-08, Asia/Riyadh): PRODUCTION READY / PUBLISHED.** Preview `6af0b9de370a4aa7a4a35209` and Production deployment published.
+
+1. **LEMON-045 (Registration Guide Email Integration)**:
+   - Added compact collapsible sections to the existing Registration Guide modal (`RegistrationGuideModal`).
+   - Integrated official university email guidelines for Cohort & Track section codes:
+     - 2021 & later, English track: **K – R**
+     - 2021 & later, Arabic track: **D**
+     - 2020 & earlier, Arabic track: **A – T**
+     - 2020 & earlier, English track: none listed in official guidelines
+     - Advisory notice: Codes guide academic registration on the official Banner portal. Sections are not blocked or hidden in LEMON.
+   - Integrated College Elective course rules:
+     - 2022 & later, English track: Eligible English-taught course outside student's plan/department, open to all majors.
+     - 2021 & earlier, Arabic track: Eligible Arabic-taught course outside student's plan/department, open to all majors.
+     - Scope note: Rules apply strictly to specified cohorts; other cohorts consult academic advisor.
+   - Final Exam Schedule Reminder: Explicit reminder to verify official final exam schedule on the KFU student portal before confirming registration (no fake conflict detection or invented exam dates).
+   - Verified Official University Links (both HTTP 200 validated):
+     - University Requirements Schedule: `https://www.kfu.edu.sa/ar/Deans/E-Learning/Pages/University-Requirements-Schedule.aspx`
+     - Study Plans: `https://www.kfu.edu.sa/ar/Colleges/business-administration/Pages/Study-Plans.aspx`
+   - Complete RTL/LTR localization in Arabic and English.
+   - Zero changes to KFU ingestion, worker secrets, schedule generation, GPA, or guest storage.
+
+2. **Deployments & Rollback Targets**:
+   - Preview: `6af0b9de370a4aa7a4a35209` (`https://6af0b9de370a4aa7a4a35209--yourcampuspallemon.netlify.app`)
+   - Previous rollback targets: `6af0b66b4da1cbf77e4199e5`, `6af0b406fd8b4559f09a240a`, `6af0a8bea32da10e37ca7557`.
+
+## LEMON-045 Registration Guide Evidence Matrix
+
+| Gate | Status | Verified Evidence |
+| --- | --- | --- |
+| Cohort Registration Codes | PASS | Verified in UI & test: 2021+ EN (K–R), 2021+ AR (D), 2020- AR (A–T), 2020- EN (None). Advisory disclaimer included. |
+| College Electives Rules | PASS | Verified in UI & test: 2022+ EN and 2021- AR outside-department rules. |
+| Final Exam Reminder | PASS | Explicit warning to check official final exam dates in Banner; no fake conflict detection. |
+| Verified University Links | PASS | Both URLs verified live (HTTP 200, matching titles); links have `target="_blank" rel="noopener noreferrer"`. |
+| Automated Tests | PASS | `src/components/registration-guide-update.test.tsx`: 2/2 passed. `welcome-and-guide.test.tsx`: 7/7 passed. |
+| Types & Lint | PASS | `tsc --noEmit`: 0 errors. `npm run lint`: 0 errors. |
+| Builds & Packaging | PASS | `npm run build` and `npx netlify build` completed with code 0. |
+| Rollback Preservation | PRESERVED | Target `6af0b66b4da1cbf77e4199e5` preserved. |
+
+---
+
 # LEMON-045 Public GitHub & Verified Footer Release Gate
 
 **Decision (2026-11-08, Asia/Riyadh): PRODUCTION READY / PUBLISHED.** Preview `6af0b61bce02902698c60467` and Production deployment published.
