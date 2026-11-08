@@ -147,6 +147,74 @@ describe("LEMON-048A: Owner Control Center & Observability (/admin)", () => {
       expect(screen.getByText("LCP (Largest Contentful Paint)")).toBeInTheDocument();
       expect(screen.getByText("Disabled by Default")).toBeInTheDocument();
     });
+
+    it("renders authenticated command center in Arabic RTL mode with Saudi translations", async () => {
+      const token = createAdminSessionToken({
+        email: "owner@example.com",
+        sub: "google-sub-12345",
+      });
+
+      const headers = new Headers();
+      headers.set("cookie", `${ADMIN_SESSION_COOKIE_NAME}=${token}`);
+      vi.mocked(nextHeaders.headers).mockResolvedValue(headers);
+
+      const jsx = await AdminPage({ searchParams: Promise.resolve({ lang: "ar" }) });
+      render(jsx);
+
+      expect(screen.getByText("مركز تحكم المالك")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "تسجيل الخروج" })).toBeInTheDocument();
+      expect(screen.getByText("جاهزية الموقع")).toBeInTheDocument();
+      expect(screen.getByText("شعب البنين / البنات")).toBeInTheDocument();
+      expect(screen.getByText(/الحدود الأمنية للعمليات/)).toBeInTheDocument();
+    });
+
+    it("renders specific tabs when tab search parameter is supplied", async () => {
+      const token = createAdminSessionToken({
+        email: "owner@example.com",
+        sub: "google-sub-12345",
+      });
+
+      const headers = new Headers();
+      headers.set("cookie", `${ADMIN_SESSION_COOKIE_NAME}=${token}`);
+      vi.mocked(nextHeaders.headers).mockResolvedValue(headers);
+
+      // 1. Health Tab
+      const healthJsx = await AdminPage({ searchParams: Promise.resolve({ tab: "health" }) });
+      const { unmount: unmountHealth } = render(healthJsx);
+      expect(screen.getByText(/Platform Health & Diagnostics/i)).toBeInTheDocument();
+      expect(screen.getByText(/Operational Services Matrix/i)).toBeInTheDocument();
+      unmountHealth();
+
+      // 2. KFU Data Tab
+      const kfuJsx = await AdminPage({ searchParams: Promise.resolve({ tab: "kfu" }) });
+      const { unmount: unmountKfu } = render(kfuJsx);
+      expect(screen.getByText(/KFU Data Pipeline & Windows Worker/i)).toBeInTheDocument();
+      expect(screen.getByText(/Freshness & Staleness Thresholds/i)).toBeInTheDocument();
+      unmountKfu();
+
+      // 3. Security Tab
+      const secJsx = await AdminPage({ searchParams: Promise.resolve({ tab: "security" }) });
+      const { unmount: unmountSec } = render(secJsx);
+      expect(screen.getByText(/Security Posture & Access Governance/i)).toBeInTheDocument();
+      expect(screen.getByText(/Defense-in-Depth Security Checklist/i)).toBeInTheDocument();
+      expect(screen.getByText("7/7 Passed")).toBeInTheDocument();
+      unmountSec();
+
+      // 4. Integrations Tab
+      const intJsx = await AdminPage({ searchParams: Promise.resolve({ tab: "integrations" }) });
+      const { unmount: unmountInt } = render(intJsx);
+      expect(screen.getByText(/Integrations & Monitoring Providers/i)).toBeInTheDocument();
+      expect(screen.getByText(/Truthful Integration Policy/i)).toBeInTheDocument();
+      expect(screen.getByText(/100% Free-Tier Compatible/i)).toBeInTheDocument();
+      unmountInt();
+
+      // 5. Settings Tab
+      const setJsx = await AdminPage({ searchParams: Promise.resolve({ tab: "settings" }) });
+      render(setJsx);
+      expect(screen.getByText(/Preferences & System Configuration/i)).toBeInTheDocument();
+      expect(screen.getByText(/Appearance & Theme/i)).toBeInTheDocument();
+      expect(screen.getByText(/System Environment \(Read-Only\)/i)).toBeInTheDocument();
+    });
   });
 
   describe("API Route Authorization & Truthful Metrics (/api/admin/metrics)", () => {

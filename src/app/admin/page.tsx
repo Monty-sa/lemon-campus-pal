@@ -4,6 +4,7 @@ import {
   isOwnerAuthConfigured,
   getAdminSessionFromCookie,
   getTrustedRedirectOrigin,
+  getOwnerAllowlist,
 } from "@/lib/admin/auth";
 import { getSnapshotStore } from "@/lib/kfu-monitor/storage";
 import { maleOfferings, femaleOfferings } from "@/data/offerings";
@@ -12,6 +13,8 @@ import { getUptimeRobotStatus } from "@/lib/monitoring/uptimerobot";
 import { getBetterStackStatus } from "@/lib/monitoring/better-stack";
 import { getLogRocketStatus } from "@/lib/monitoring/logrocket";
 import { getNewRelicStatus } from "@/lib/monitoring/new-relic";
+import { AdminCommandCenter } from "@/components/admin/AdminCommandCenter";
+import type { AdminDashboardData } from "@/components/admin/types";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +26,7 @@ export default async function AdminPage(props: AdminPageProps) {
   const searchParams = props.searchParams ? await props.searchParams : {};
   const errorParam = typeof searchParams.error === "string" ? searchParams.error : undefined;
   const langParam = typeof searchParams.lang === "string" ? searchParams.lang : "en";
+  const tabParam = typeof searchParams.tab === "string" ? searchParams.tab : "overview";
   const isAr = langParam === "ar";
 
   const headerList = await headers();
@@ -156,13 +160,14 @@ export default async function AdminPage(props: AdminPageProps) {
     );
   }
 
-  // 3. STATE C: Verified Owner Control Center
+  // 3. STATE C: Verified Owner Command Center
   const store = getSnapshotStore();
-  const metadata = await store.getMetadata();
-
-  const [sentry, uptime] = await Promise.all([
+  const [metadata, sentry, uptime, changesMale, changesFemale] = await Promise.all([
+    store.getMetadata(),
     getSentryIssueSummary(),
     getUptimeRobotStatus(),
+    store.getSectionChanges("11"),
+    store.getSectionChanges("12"),
   ]);
 
   const betterStack = getBetterStackStatus();
@@ -174,191 +179,87 @@ export default async function AdminPage(props: AdminPageProps) {
   const maleCourses = metadata?.maleCourseCount ?? maleOfferings.courses.length;
   const femaleCourses = metadata?.femaleCourseCount ?? femaleOfferings.courses.length;
 
+  const dashboardData: AdminDashboardData = {
+    ownerSession: {
+      email: session.email,
+      sub: session.sub,
+      name: session.name,
+      picture: session.picture,
+      iat: session.iat,
+      exp: session.exp,
+    },
+    overview: {
+      siteStatus: uptime.isConfigured && uptime.monitors[0] ? uptime.monitors[0].status : "Not connected",
+      uptimeRatio: uptime.isConfigured && uptime.monitors[0] ? uptime.monitors[0].uptimeRatio : "Not connected",
+      sourceHealth: metadata?.sourceHealth ?? "healthy",
+      lastPublishedAt: metadata?.lastPublishedSnapshot ?? maleOfferings.importedAt,
+      activeSnapshotVersion: metadata?.activeVersion ?? "144820-verified",
+      maleCounts: { courses: maleCourses, sections: maleSections },
+      femaleCounts: { courses: femaleCourses, sections: femaleSections },
+      unresolvedErrorsCount: sentry.isConfigured && sentry.apiConnected ? sentry.issues.length : "Not connected",
+    },
+    errors: {
+      sentryConfigured: sentry.isConfigured,
+      apiConnected: sentry.apiConnected,
+      statusMessage: sentry.statusMessage,
+      issues: sentry.issues,
+    },
+    kfuRefresh: {
+      refreshSource: metadata?.refreshSource ?? "windows_worker",
+      lastAttemptedCheck: metadata?.lastAttemptedCheck ?? maleOfferings.importedAt,
+      lastSuccessfulMale: metadata?.lastSuccessfulFetchMale ?? maleOfferings.importedAt,
+      lastSuccessfulFemale: metadata?.lastSuccessfulFetchFemale ?? femaleOfferings.importedAt,
+      failureReason: metadata?.failureReason ?? null,
+      heartbeatStatus: betterStack.statusMessage,
+      workerNotice: "Netlify serverless ingestion receives publications pushed from the local Windows worker. Netlify does not wake or poll local PCs.",
+      sectionChangesMale: changesMale.map((c) => ({
+        crn: c.crn,
+        courseCode: c.courseCode,
+        changeType: c.changeType,
+        summary: c.summary,
+        detectedAt: c.detectedAt,
+      })),
+      sectionChangesFemale: changesFemale.map((c) => ({
+        crn: c.crn,
+        courseCode: c.courseCode,
+        changeType: c.changeType,
+        summary: c.summary,
+        detectedAt: c.detectedAt,
+      })),
+    },
+    performance: {
+      coreWebVitalsTargets: {
+        lcp: "<= 1.5s (Good)",
+        inp: "<= 100ms (Good)",
+        cls: "<= 0.05 (Good)",
+      },
+      monitoring: {
+        uptimeRobot: uptime.statusMessage,
+        newRelic: newRelic.statusMessage,
+        logRocket: logrocket.statusMessage,
+      },
+    },
+    security: {
+      googleAuthVerified: true,
+      allowedRedirectOrigin: getTrustedRedirectOrigin(),
+      cookieSettings: "HttpOnly; SameSite=Lax; Secure; Max-Age=86400",
+      isOwnerSubsConfigured: Boolean(process.env.ADMIN_OWNER_SUBS),
+      ownerEmailsCount: getOwnerAllowlist().length,
+    },
+    systemInfo: {
+      nodeVersion: process.version,
+      environment: process.env.NODE_ENV ?? "production",
+      deployId: process.env.DEPLOY_ID ?? "6af0d11f8e705c8310134c80",
+      commitSha: process.env.COMMIT_REF ?? "696f5d6",
+      timestamp: new Date().toISOString(),
+    },
+  };
+
   return (
-    <main className="admin-page owner-dashboard" dir={isAr ? "rtl" : "ltr"}>
-      <header className="admin-header">
-        <div className="admin-brand">
-          <Link href="/" className="brand" aria-label="LEMON home">
-            <span className="brand-fruit"><span>LE</span><b>MON</b></span>
-          </Link>
-          <span className="admin-portal-badge">{isAr ? "مركز تحكم المالك" : "Owner Control Center"}</span>
-        </div>
-
-        <div className="admin-header-actions">
-          <div className="owner-badge">
-            <span className="owner-status-dot"></span>
-            <span className="owner-email">{session.email}</span>
-          </div>
-          <Link href={`/admin?lang=${isAr ? "en" : "ar"}`} className="admin-btn small secondary">
-            {isAr ? "English" : "العربية"}
-          </Link>
-          <a href="/api/admin/auth/logout" className="admin-btn small danger-outline">
-            {isAr ? "تسجيل الخروج" : "Sign Out"}
-          </a>
-        </div>
-      </header>
-
-      <div className="admin-content">
-        {/* AREA 1: OVERVIEW */}
-        <section className="admin-section" aria-labelledby="area-overview">
-          <h2 id="area-overview">📊 {isAr ? "نظرة عامة والجاهزية" : "System Overview & Availability"}</h2>
-          <div className="metrics-grid">
-            <div className="metric-card">
-              <span className="metric-label">{isAr ? "جاهزية الموقع" : "Public Site Uptime"}</span>
-              <span className={`metric-value ${uptime.isConfigured && uptime.monitors.length > 0 ? "status-ok" : "status-muted"}`}>
-                {uptime.isConfigured && uptime.monitors.length > 0 ? uptime.monitors[0].uptimeRatio : (isAr ? "غير متصل" : "Not connected")}
-              </span>
-              <span className="metric-sub">{uptime.isConfigured ? (isAr ? "مراقب عبر UptimeRobot" : "Monitored via UptimeRobot") : (isAr ? "UptimeRobot غير مهيّأ" : "UptimeRobot not configured")}</span>
-            </div>
-            <div className="metric-card">
-              <span className="metric-label">{isAr ? "آخر نشر للبيانات" : "Latest KFU Publication"}</span>
-              <span className="metric-value">{metadata?.activeVersion ?? "144820-verified"}</span>
-              <span className="metric-sub">{new Date(metadata?.lastPublishedSnapshot ?? maleOfferings.importedAt).toLocaleDateString()}</span>
-            </div>
-            <div className="metric-card">
-              <span className="metric-label">{isAr ? "شعب البنين / البنات" : "Male / Female Sections"}</span>
-              <span className="metric-value">{maleSections} ♂ · {femaleSections} ♀</span>
-              <span className="metric-sub">{maleCourses} ♂ / {femaleCourses} ♀ {isAr ? "مقرراً" : "courses"}</span>
-            </div>
-            <div className="metric-card">
-              <span className="metric-label">{isAr ? "الأخطاء النشطة (24 ساعة)" : "Unresolved Issues (24h)"}</span>
-              <span className={`metric-value ${sentry.isConfigured && sentry.apiConnected ? (sentry.issues.length > 0 ? "status-warn" : "status-ok") : "status-muted"}`}>
-                {sentry.isConfigured && sentry.apiConnected ? sentry.issues.length : (isAr ? "غير متصل" : "Not connected")}
-              </span>
-              <span className="metric-sub">{sentry.isConfigured && sentry.apiConnected ? sentry.statusMessage : (isAr ? "Sentry غير مربوط" : "Sentry not linked")}</span>
-            </div>
-          </div>
-        </section>
-
-        {/* AREA 2: ERRORS */}
-        <section className="admin-section" aria-labelledby="area-errors">
-          <div className="section-title-wrap">
-            <h2 id="area-errors">🛡️ {isAr ? "رصد الأخطاء (Sentry)" : "Error Monitoring (Sentry)"}</h2>
-            <span className={`badge-pill ${sentry.isConfigured ? "active" : "pending"}`}>
-              {sentry.isConfigured ? (isAr ? "مفعّل" : "Active") : (isAr ? "بانتظار التهيئة" : "Ready for Setup")}
-            </span>
-          </div>
-
-          <div className="info-card">
-            <p className="admin-hint">
-              {isAr
-                ? "يتم حجب بيانات جداول الطلاب، التقديرات، وأرقام الـ CRN بشكل صارم قبل إرسال أي استثناء لمنع تسريب بيانات الطلاب."
-                : "Student schedules, GPA grades, and CRNs are strictly redacted at runtime before exception transmission."}
-            </p>
-
-            {sentry.issues.length > 0 ? (
-              <div className="table-responsive">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>{isAr ? "الخطأ" : "Issue"}</th>
-                      <th>{isAr ? "المستوى" : "Level"}</th>
-                      <th>{isAr ? "التكرار" : "Events"}</th>
-                      <th>{isAr ? "المستخدمين" : "Users"}</th>
-                      <th>{isAr ? "رابط Sentry" : "Action"}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sentry.issues.map((issue) => (
-                      <tr key={issue.id}>
-                        <td>
-                          <b>{issue.title}</b>
-                          {issue.culprit && <div className="sub-text">{issue.culprit}</div>}
-                        </td>
-                        <td><span className={`role-tag ${issue.level}`}>{issue.level}</span></td>
-                        <td>{issue.count}</td>
-                        <td>{issue.userCount}</td>
-                        <td>
-                          <a href={issue.permalink} target="_blank" rel="noopener noreferrer" className="admin-link-action">
-                            {isAr ? "فتح في Sentry ↗" : "View in Sentry ↗"}
-                          </a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="empty-notice">
-                <span>{sentry.statusMessage}</span>
-                {!sentry.isConfigured && (
-                  <div className="setup-inline-hint">
-                    <code>SENTRY_DSN</code>, <code>SENTRY_AUTH_TOKEN</code>, <code>SENTRY_ORG</code>, <code>SENTRY_PROJECT</code>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* AREA 3: KFU REFRESH */}
-        <section className="admin-section" aria-labelledby="area-kfu">
-          <div className="section-title-wrap">
-            <h2 id="area-kfu">🔄 {isAr ? "تحديثات جامعة الملك فيصل ومراقب Windows" : "KFU Refresh & Windows Worker"}</h2>
-            <span className={`badge-pill ${metadata?.sourceHealth === "healthy" ? "active" : "pending"}`}>
-              {metadata?.sourceHealth ?? "healthy"}
-            </span>
-          </div>
-
-          <div className="info-card">
-            <div className="info-row">
-              <strong>{isAr ? "مصدر التحديث:" : "Refresh Source:"}</strong>
-              <span>Windows Scheduled Task ({metadata?.refreshSource ?? "windows_worker"})</span>
-            </div>
-            <div className="info-row">
-              <strong>{isAr ? "آخر فحص ناجح:" : "Last Successful Check:"}</strong>
-              <span>{new Date(metadata?.lastAttemptedCheck ?? maleOfferings.importedAt).toLocaleString()}</span>
-            </div>
-            <div className="info-row">
-              <strong>{isAr ? "نبضات مراقبة العامل (Better Stack Heartbeat):" : "Worker Heartbeat (Better Stack):"}</strong>
-              <span>{betterStack.statusMessage}</span>
-            </div>
-            {metadata?.failureReason && (
-              <div className="info-row alert-row">
-                <strong>{isAr ? "سبب التنبيه:" : "Last Warning / Failure:"}</strong>
-                <span className="text-danger">{metadata.failureReason}</span>
-              </div>
-            )}
-            <div className="info-row notice-row">
-              <strong>{isAr ? "تنبيه أمني:" : "Operational Boundary:"}</strong>
-              <span>
-                {isAr
-                  ? "تستقبل خوادم Netlify تحديثات الجداول المرسلة فقط من جهاز المالك المعتمد عبر توقيع HMAC. لا يمكن لـ Netlify إيقاظ أو تشغيل جهاز المالك عن بُعد."
-                  : "Netlify serverless ingestion only accepts authenticated pushes from the owner's Windows worker via HMAC. Netlify cannot wake or control local PCs."}
-              </span>
-            </div>
-          </div>
-        </section>
-
-        {/* AREA 4: PERFORMANCE */}
-        <section className="admin-section" aria-labelledby="area-performance">
-          <h2 id="area-performance">⚡ {isAr ? "الأداء ومؤشرات تجربة المستخدم" : "Performance & Core Web Vitals"}</h2>
-          <div className="metrics-grid">
-            <div className="metric-card">
-              <span className="metric-label">LCP (Largest Contentful Paint)</span>
-              <span className="metric-value status-ok">&le; 1.5s</span>
-              <span className="metric-sub">{isAr ? "هدف ممتاز للشبكات السريعة" : "LIGHTSPEED Target (Fast Mobile)"}</span>
-            </div>
-            <div className="metric-card">
-              <span className="metric-label">INP (Interaction to Next Paint)</span>
-              <span className="metric-value status-ok">&le; 100ms</span>
-              <span className="metric-sub">{isAr ? "استجابة فورية للنقر" : "Smooth mid-range mobile"}</span>
-            </div>
-            <div className="metric-card">
-              <span className="metric-label">CLS (Cumulative Layout Shift)</span>
-              <span className="metric-value status-ok">&le; 0.05</span>
-              <span className="metric-sub">{isAr ? "ثبات بصري تام" : "Zero unexpected shifts"}</span>
-            </div>
-            <div className="metric-card">
-              <span className="metric-label">New Relic / LogRocket</span>
-              <span className="metric-value status-muted">{isAr ? "معطّل افتراضياً" : "Disabled by Default"}</span>
-              <span className="metric-sub" title={`${newRelic.statusMessage} | ${logrocket.statusMessage}`}>
-                {isAr ? "للحفاظ على الخصوصية وخفة الموقع" : "Budget & student privacy preserved"}
-              </span>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
+    <AdminCommandCenter
+      initialData={dashboardData}
+      initialTab={tabParam}
+      initialLang={isAr ? "ar" : "en"}
+    />
   );
 }
