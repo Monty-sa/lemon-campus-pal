@@ -18,6 +18,16 @@ describe("KFU Snapshot API Route (/api/kfu/snapshot)", () => {
     expect(body.snapshot.studentCategory.id).toBe("11");
     expect(body.snapshot.courses.length).toBe(maleOfferings.courses.length);
     expect(res.headers.get("Cache-Control")).toContain("public");
+    const etag = res.headers.get("ETag");
+    expect(etag).toBeTruthy();
+
+    // Verify 304 Not Modified when client sends matching If-None-Match
+    const conditionalReq = new Request("http://localhost/api/kfu/snapshot?category=11", {
+      headers: { "If-None-Match": etag! },
+    });
+    const conditionalRes = await getSnapshot(conditionalReq);
+    expect(conditionalRes.status).toBe(304);
+    expect(conditionalRes.headers.get("ETag")).toBe(etag);
   });
 
   it("returns active female snapshot for category=12", async () => {

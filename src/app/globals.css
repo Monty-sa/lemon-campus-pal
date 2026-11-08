@@ -584,8 +584,9 @@ body, .topbar, .hero, .workspace, .catalog, .planner-panel, .course-group, .cour
     align-items: stretch;
   }
   .floating-schedule-anchor {
-    bottom: 16px;
-    right: 16px;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    inset-inline-end: 16px;
+    inset-inline-start: auto;
   }
   .floating-schedule-pill {
     padding: 8px 12px;
@@ -1639,8 +1640,9 @@ body, .topbar, .hero, .workspace, .catalog, .planner-panel, .course-group, .cour
 }
 .floating-schedule-anchor {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: 24px;
+  inset-inline-start: auto;
   z-index: 40;
 }
 .floating-schedule-pill {
@@ -2914,6 +2916,12 @@ body, .topbar, .hero, .workspace, .catalog, .planner-panel, .course-group, .cour
 [dir="rtl"] .floating-schedule-anchor {
   right: auto;
   left: 24px;
+}
+@media (max-width: 600px) {
+  [dir="rtl"] .floating-schedule-anchor {
+    right: auto;
+    left: 16px;
+  }
 }
 [dir="rtl"] .download-menu {
   right: auto;

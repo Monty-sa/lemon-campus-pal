@@ -1,0 +1,225 @@
+{
+  "timestamp": "2026-11-08T18:17:11.180Z",
+  "productionUrl": "https://yourcampuspallemon.netlify.app",
+  "httpResults": [
+    {
+      "label": "Homepage Document (HTML)",
+      "url": "https://yourcampuspallemon.netlify.app/",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=0,must-revalidate",
+      "etag": "W/\"vfiuwtthap7nbf\"",
+      "compressedBytes": 385955,
+      "compressedKb": "376.9",
+      "coldTtfbMs": "94.7",
+      "medianTtfbMs": "96.4",
+      "p95TtfbMs": "580.8",
+      "coldTotalMs": "96.3",
+      "medianTotalMs": "98.1",
+      "p95TotalMs": "762.2"
+    },
+    {
+      "label": "GPA Route Document (HTML)",
+      "url": "https://yourcampuspallemon.netlify.app/gpa",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=0,must-revalidate",
+      "etag": "W/\"14doaymdebd6xd\"",
+      "compressedBytes": 9518,
+      "compressedKb": "9.3",
+      "coldTtfbMs": "95.2",
+      "medianTtfbMs": "95.9",
+      "p95TtfbMs": "234.4",
+      "coldTotalMs": "95.4",
+      "medianTotalMs": "96.2",
+      "p95TotalMs": "234.9"
+    },
+    {
+      "label": "KFU Status Endpoint",
+      "url": "https://yourcampuspallemon.netlify.app/api/kfu/status",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=0,must-revalidate",
+      "etag": "none",
+      "compressedBytes": 743,
+      "compressedKb": "0.7",
+      "coldTtfbMs": "245.0",
+      "medianTtfbMs": "250.3",
+      "p95TtfbMs": "262.8",
+      "coldTotalMs": "245.4",
+      "medianTotalMs": "250.7",
+      "p95TotalMs": "263.3"
+    },
+    {
+      "label": "Male Snapshot (Category 11)",
+      "url": "https://yourcampuspallemon.netlify.app/api/kfu/snapshot?category=11",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=0,must-revalidate",
+      "etag": "none",
+      "compressedBytes": 332919,
+      "compressedKb": "325.1",
+      "coldTtfbMs": "326.5",
+      "medianTtfbMs": "363.6",
+      "p95TtfbMs": "380.3",
+      "coldTotalMs": "329.8",
+      "medianTotalMs": "446.2",
+      "p95TotalMs": "473.3"
+    },
+    {
+      "label": "Female Snapshot (Category 12)",
+      "url": "https://yourcampuspallemon.netlify.app/api/kfu/snapshot?category=12",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=0,must-revalidate",
+      "etag": "none",
+      "compressedBytes": 461834,
+      "compressedKb": "451.0",
+      "coldTtfbMs": "340.1",
+      "medianTtfbMs": "356.4",
+      "p95TtfbMs": "412.6",
+      "coldTotalMs": "433.8",
+      "medianTotalMs": "466.4",
+      "p95TotalMs": "570.2"
+    }
+  ],
+  "bundles": [
+    {
+      "name": "3b78yspj0y2a-.js",
+      "type": "js",
+      "rawBytes": 991227,
+      "gzipBytes": 104997,
+      "brBytes": 75993
+    },
+    {
+      "name": "08g_m91vmu7r_.js",
+      "type": "js",
+      "rawBytes": 424295,
+      "gzipBytes": 108738,
+      "brBytes": 89417
+    },
+    {
+      "name": "33sv2kyjb3til.js",
+      "type": "js",
+      "rawBytes": 228093,
+      "gzipBytes": 71436,
+      "brBytes": 61098
+    },
+    {
+      "name": "1c0qt7trm4143.js",
+      "type": "js",
+      "rawBytes": 164943,
+      "gzipBytes": 45291,
+      "brBytes": 38263
+    },
+    {
+      "name": "0cz1d0mv5g_q7.js",
+      "type": "js",
+      "rawBytes": 112594,
+      "gzipBytes": 39627,
+      "brBytes": 35158
+    },
+    {
+      "name": "06vdttzddh-4a.css",
+      "type": "css",
+      "rawBytes": 111896,
+      "gzipBytes": 20680,
+      "brBytes": 17242
+    },
+    {
+      "name": "2eoxeemjtegat.js",
+      "type": "js",
+      "rawBytes": 33619,
+      "gzipBytes": 8875,
+      "brBytes": 7812
+    },
+    {
+      "name": "02volskv92edw.js",
+      "type": "js",
+      "rawBytes": 33219,
+      "gzipBytes": 10324,
+      "brBytes": 8904
+    },
+    {
+      "name": "1e8blic1djf2d.js",
+      "type": "js",
+      "rawBytes": 19084,
+      "gzipBytes": 5046,
+      "brBytes": 4469
+    },
+    {
+      "name": "3qfy96eoyh-ek.js",
+      "type": "js",
+      "rawBytes": 13994,
+      "gzipBytes": 3515,
+      "brBytes": 3144
+    },
+    {
+      "name": "turbopack-2u1d16houkiyo.js",
+      "type": "js",
+      "rawBytes": 9974,
+      "gzipBytes": 3905,
+      "brBytes": 3484
+    },
+    {
+      "name": "3zt_16xndew4w.js",
+      "type": "js",
+      "rawBytes": 7862,
+      "gzipBytes": 3302,
+      "brBytes": 2878
+    },
+    {
+      "name": "0uk63h0tuavo5.js",
+      "type": "js",
+      "rawBytes": 6559,
+      "gzipBytes": 2353,
+      "brBytes": 1981
+    }
+  ],
+  "totals": {
+    "jsRawKb": "1997.5",
+    "jsGzipKb": "397.9",
+    "jsBrKb": "324.8",
+    "cssRawKb": "109.3",
+    "cssGzipKb": "20.2",
+    "cssBrKb": "16.8"
+  },
+  "zodResults": {
+    "maleZodParseMedianMs": "1.13",
+    "maleZodParseP95Ms": "8.38",
+    "femaleZodParseMedianMs": "1.59",
+    "femaleZodParseP95Ms": "5.58"
+  },
+  "searchResults": {
+    "maleFilterP50Ms": "0.757",
+    "maleFilterP95Ms": "0.895",
+    "femaleFilterP50Ms": "1.054",
+    "femaleFilterP95Ms": "1.248"
+  },
+  "autoScheduleResults": {
+    "3": {
+      "p50Ms": "0.03",
+      "p95Ms": "0.19",
+      "candidates": 1
+    },
+    "4": {
+      "p50Ms": "0.03",
+      "p95Ms": "0.03",
+      "candidates": 1
+    },
+    "5": {
+      "p50Ms": "0.04",
+      "p95Ms": "0.05",
+      "candidates": 1
+    },
+    "6": {
+      "p50Ms": "0.03",
+      "p95Ms": "0.05",
+      "candidates": 1
+    }
+  },
+  "gpaResults": {
+    "gpaCalcP50Ms": "0.0010",
+    "gpaCalcP95Ms": "0.0019"
+  }
+}

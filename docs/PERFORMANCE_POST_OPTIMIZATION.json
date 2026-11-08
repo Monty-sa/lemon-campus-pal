@@ -1,0 +1,97 @@
+{
+  "previewUrl": "https://yourcampuspallemon.netlify.app",
+  "results": [
+    {
+      "label": "Homepage Document (HTML)",
+      "url": "https://yourcampuspallemon.netlify.app/",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=0,must-revalidate",
+      "etag": "W/\"wv7s5hcce77npx\"",
+      "compressedBytes": 386477,
+      "compressedKb": "377.4",
+      "coldTtfbMs": "95.8",
+      "medianTtfbMs": "97.9",
+      "p95TtfbMs": "580.8",
+      "coldTotalMs": "98.2",
+      "medianTotalMs": "100.0",
+      "p95TotalMs": "676.6"
+    },
+    {
+      "label": "GPA Route Document (HTML)",
+      "url": "https://yourcampuspallemon.netlify.app/gpa",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=0,must-revalidate",
+      "etag": "W/\"ovahpjssxy7b5\"",
+      "compressedBytes": 10014,
+      "compressedKb": "9.8",
+      "coldTtfbMs": "96.0",
+      "medianTtfbMs": "96.7",
+      "p95TtfbMs": "286.4",
+      "coldTotalMs": "96.3",
+      "medianTotalMs": "97.0",
+      "p95TotalMs": "323.5"
+    },
+    {
+      "label": "KFU Status Endpoint",
+      "url": "https://yourcampuspallemon.netlify.app/api/kfu/status",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=0,must-revalidate",
+      "etag": "none",
+      "compressedBytes": 743,
+      "compressedKb": "0.7",
+      "coldTtfbMs": "247.7",
+      "medianTtfbMs": "257.2",
+      "p95TtfbMs": "270.2",
+      "coldTotalMs": "248.2",
+      "medianTotalMs": "257.7",
+      "p95TotalMs": "271.4"
+    },
+    {
+      "label": "Male Snapshot (Category 11)",
+      "url": "https://yourcampuspallemon.netlify.app/api/kfu/snapshot?category=11",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=300",
+      "etag": "W/\"v_1794159846747-11\"",
+      "compressedBytes": 332919,
+      "compressedKb": "325.1",
+      "coldTtfbMs": "96.3",
+      "medianTtfbMs": "97.5",
+      "p95TtfbMs": "347.6",
+      "coldTotalMs": "97.5",
+      "medianTotalMs": "99.2",
+      "p95TotalMs": "442.1"
+    },
+    {
+      "label": "Female Snapshot (Category 12)",
+      "url": "https://yourcampuspallemon.netlify.app/api/kfu/snapshot?category=12",
+      "status": 200,
+      "encoding": "br",
+      "cacheControl": "public,max-age=300",
+      "etag": "W/\"v_1794159846747-12\"",
+      "compressedBytes": 461834,
+      "compressedKb": "451.0",
+      "coldTtfbMs": "98.1",
+      "medianTtfbMs": "99.6",
+      "p95TtfbMs": "381.7",
+      "coldTotalMs": "100.7",
+      "medianTotalMs": "102.3",
+      "p95TotalMs": "477.0"
+    }
+  ],
+  "revalidation": {
+    "male": {
+      "etag": "W/\"v_1794159846747-11\"",
+      "revalidationStatus": 304,
+      "revalidationTransferredBytes": 0
+    },
+    "female": {
+      "etag": "W/\"v_1794159846747-12\"",
+      "revalidationStatus": 304,
+      "revalidationTransferredBytes": 0
+    }
+  }
+}

@@ -25,6 +25,23 @@ export async function GET(request: Request) {
 
     const snapshot = active ?? (category === "12" ? femaleOfferings : maleOfferings);
 
+    const versionTag = pointer?.version ?? metadata?.activeVersion ?? "144820-base";
+    const etag = `W/"${versionTag}-${category}"`;
+    const clientIfNoneMatch = request.headers.get("if-none-match");
+
+    const cacheHeaders = {
+      "Cache-Control": "public, max-age=300, stale-while-revalidate=86400",
+      "ETag": etag,
+      "Netlify-Vary": "query=category",
+    };
+
+    if (clientIfNoneMatch && (clientIfNoneMatch === etag || clientIfNoneMatch === `"${versionTag}-${category}"`)) {
+      return new NextResponse(null, {
+        status: 304,
+        headers: cacheHeaders,
+      });
+    }
+
     return NextResponse.json(
       {
         snapshot,
@@ -36,10 +53,7 @@ export async function GET(request: Request) {
       },
       {
         status: 200,
-        headers: {
-          "Cache-Control": "public, max-age=0, must-revalidate",
-          "Netlify-Vary": "query=category",
-        },
+        headers: cacheHeaders,
       },
     );
   } catch (error: unknown) {

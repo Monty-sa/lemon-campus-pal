@@ -1,6 +1,8 @@
 import { type Course, type DataImport, type Day, type Section } from "./schema";
-import { matchesSearchText } from "./search-normalizer";
+import { normalizeSearchText } from "./search-normalizer";
 import { getLocalizedCourseTitle } from "./i18n/course-titles";
+
+const normalizedSectionHaystackCache = new WeakMap<Section, string>();
 
 export type DayMatchMode = "match" | "avoid";
 
@@ -128,6 +130,9 @@ export function filterSections(
 ): { visibleSections: Section[]; visibleGroups: { course: Course; sections: Section[] }[] } {
   const courseMap = new Map(courses.map((course) => [course.id, course]));
   const trimmedCrn = filters.exactCrn.trim();
+  const queryTokens = filters.query.trim()
+    ? normalizeSearchText(filters.query).split(" ").filter(Boolean)
+    : [];
 
   const visibleSections = sections.filter((section) => {
     // 1. Term check
@@ -199,12 +204,19 @@ export function filterSections(
       }
     }
 
-    // 9. General search query (Arabic and English aware normalization)
-    if (filters.query.trim()) {
-      const enTitle = getLocalizedCourseTitle(course, "en").title;
-      const haystack = `${course.code} ${course.titleAr} ${enTitle} ${course.titleEn ?? ""} ${section.crn} ${section.instructor?.name ?? ""}`;
-      if (!matchesSearchText(haystack, filters.query)) {
-        return false;
+    // 9. General search query (Arabic and English aware normalization with caching)
+    if (queryTokens.length > 0) {
+      let haystack = normalizedSectionHaystackCache.get(section);
+      if (haystack === undefined) {
+        const enTitle = getLocalizedCourseTitle(course, "en").title;
+        const rawHaystack = `${course.code} ${course.titleAr} ${enTitle} ${course.titleEn ?? ""} ${section.crn} ${section.instructor?.name ?? ""}`;
+        haystack = normalizeSearchText(rawHaystack);
+        normalizedSectionHaystackCache.set(section, haystack);
+      }
+      for (const token of queryTokens) {
+        if (!haystack.includes(token)) {
+          return false;
+        }
       }
     }
 

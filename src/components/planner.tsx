@@ -11,7 +11,6 @@ import { importGuestPlansToAccount, restoreGuestPlansOnLogout, syncPlansOnLogin 
 import type { Course, DataImport, Day, SchedulePlan, Section } from "@/lib/schema";
 import { addSectionToPlan, calculateCredits, findConflicts, formatTime, hasConflictWithSections } from "@/lib/schedule";
 import { EARLIEST_TIME_OPTIONS, LATEST_TIME_OPTIONS } from "@/lib/auto-schedule";
-import { exportSchedulePdf, exportSchedulePng } from "@/lib/export/timetable-export";
 import {
   CATEGORY_STORAGE_KEY,
   clearGuestStorage,
@@ -43,7 +42,7 @@ import {
 import type { InAppNotification } from "@/lib/notifications/types";
 import { isThemePreference, resolveTheme, THEME_STORAGE_KEY, type ThemePreference } from "@/lib/theme";
 import { isAdminUser } from "@/lib/cloud/admin";
-import { allOfferings, femaleOfferings, maleOfferings } from "@/data/offerings";
+import { maleOfferings } from "@/data/male-offerings";
 import {
   getLanguageDirection,
   getLocalizedCourseTitle,
@@ -64,8 +63,10 @@ import {
 import { OnboardingModal } from "./onboarding-modal";
 import { RegistrationGuideModal } from "./registration-guide-modal";
 import { CourseDetailsModal } from "./course-details-modal";
-import { AutoSchedulePanel } from "./auto-schedule-panel";
 import { DataPrivacyModal } from "./data-privacy-modal";
+import dynamic from "next/dynamic";
+
+const AutoSchedulePanel = dynamic(() => import("./auto-schedule-panel").then((m) => m.AutoSchedulePanel));
 
 const days: { id: Day }[] = [
   { id: "sun" },
@@ -188,7 +189,11 @@ export function Planner({
   });
   const [liveMetadata, setLiveMetadata] = useState<KfuRefreshMetadata | null>(null);
 
-  const data = liveSnapshots[selectedCategory] ?? allOfferings[selectedCategory] ?? initialData ?? maleOfferings;
+  const DEFAULT_FEMALE_SECTIONS_COUNT = 540;
+  const data = liveSnapshots[selectedCategory] ?? initialData ?? maleOfferings;
+  const maleSectionCount = liveSnapshots["11"]?.sections.length ?? maleOfferings.sections.length;
+  const femaleSectionCount = liveSnapshots["12"]?.sections.length ?? DEFAULT_FEMALE_SECTIONS_COUNT;
+
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [dataPrivacyModalOpen, setDataPrivacyModalOpen] = useState(false);
   const [expandedCourseMap, setExpandedCourseMap] = useState<Record<string, boolean>>({});
@@ -196,6 +201,14 @@ export function Planner({
   useEffect(() => {
     let isMounted = true;
     async function loadSnapshot() {
+      if (selectedCategory === "12" && !liveSnapshots["12"]) {
+        import("@/data/female-offerings").then((m) => {
+          if (isMounted) {
+            setLiveSnapshots((prev) => (prev["12"] ? prev : { ...prev, "12": m.femaleOfferings }));
+          }
+        }).catch(() => {});
+      }
+
       try {
         const res = await fetch(`/api/kfu/snapshot?category=${selectedCategory}`);
         if (!res.ok) return;
@@ -218,7 +231,7 @@ export function Planner({
     return () => {
       isMounted = false;
     };
-  }, [selectedCategory]);
+  }, [selectedCategory, liveSnapshots]);
 
   const [plans, setPlans] = useState<SchedulePlan[]>(() => {
     if (typeof window === "undefined") return [];
@@ -395,6 +408,11 @@ export function Planner({
 
   function handleCategoryChange(newCategory: "11" | "12") {
     setSelectedCategory(newCategory);
+    if (newCategory === "12" && !liveSnapshots["12"]) {
+      import("@/data/female-offerings").then((m) => {
+        setLiveSnapshots((prev) => (prev["12"] ? prev : { ...prev, "12": m.femaleOfferings }));
+      }).catch(() => {});
+    }
     if (typeof window !== "undefined") {
       saveSavedCategory(window.localStorage, newCategory);
     }
@@ -801,6 +819,7 @@ export function Planner({
   async function handleDownloadPdf() {
     setDownloadMenuOpen(false);
     try {
+      const { exportSchedulePdf } = await import("@/lib/export/timetable-export");
       await exportSchedulePdf({
         planName: activePlan.name,
         termLabel: termLabel(data, lang),
@@ -820,6 +839,7 @@ export function Planner({
   async function handleDownloadPng() {
     setDownloadMenuOpen(false);
     try {
+      const { exportSchedulePng } = await import("@/lib/export/timetable-export");
       await exportSchedulePng({
         planName: activePlan.name,
         termLabel: termLabel(data, lang),
@@ -1588,12 +1608,12 @@ export function Planner({
                     }
                   }}
                   tabIndex={selectedCategory === "11" ? 0 : -1}
-                  aria-label={`👨 ${t.categorySelector.maleFull(maleOfferings.sections.length)}`}
+                  aria-label={`👨 ${t.categorySelector.maleFull(maleSectionCount)}`}
                 >
                   <span className="category-glyph">👨</span>
                   <span className="category-text">
                     <span className="category-title">{t.categorySelector.maleLabel}</span>
-                    <span className="category-badge">{maleOfferings.sections.length}</span>
+                    <span className="category-badge">{maleSectionCount}</span>
                   </span>
                 </button>
                 <button
@@ -1609,12 +1629,12 @@ export function Planner({
                     }
                   }}
                   tabIndex={selectedCategory === "12" ? 0 : -1}
-                  aria-label={`👩 ${t.categorySelector.femaleFull(femaleOfferings.sections.length)}`}
+                  aria-label={`👩 ${t.categorySelector.femaleFull(femaleSectionCount)}`}
                 >
                   <span className="category-glyph">👩</span>
                   <span className="category-text">
                     <span className="category-title">{t.categorySelector.femaleLabel}</span>
-                    <span className="category-badge">{femaleOfferings.sections.length}</span>
+                    <span className="category-badge">{femaleSectionCount}</span>
                   </span>
                 </button>
               </div>
@@ -1627,8 +1647,8 @@ export function Planner({
                 aria-label={t.categorySelector.label}
                 tabIndex={-1}
               >
-                <option value="11">{t.categorySelector.maleFull(maleOfferings.sections.length)}</option>
-                <option value="12">{t.categorySelector.femaleFull(femaleOfferings.sections.length)}</option>
+                <option value="11">{t.categorySelector.maleFull(maleSectionCount)}</option>
+                <option value="12">{t.categorySelector.femaleFull(femaleSectionCount)}</option>
               </select>
               {data.warnings.length > 0 && (
                 <span className="dataset-warning-hint" role="status">
@@ -3059,8 +3079,8 @@ export function Planner({
         onCategoryChange={handleOnboardingCategoryChange}
         onComplete={handleOnboardingComplete}
         t={t}
-        maleSectionCount={maleOfferings.sections.length}
-        femaleSectionCount={femaleOfferings.sections.length}
+        maleSectionCount={maleSectionCount}
+        femaleSectionCount={femaleSectionCount}
       />
 
       <RegistrationGuideModal
