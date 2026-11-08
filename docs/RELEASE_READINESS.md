@@ -1,16 +1,40 @@
-# LEMON-045 Public GitHub Launch Gate
+# LEMON-045 Public GitHub & Verified Footer Release Gate
 
-**Decision (2026-11-08, Asia/Riyadh): WAITING FOR OWNER APPROVAL.** The current source is prepared and verified for a public repository, but no repository has been created and no footer or Netlify deployment change is authorized until the owner confirms the GitHub account/organization, public visibility, license, and history strategy.
+**Decision (2026-11-08, Asia/Riyadh): PRODUCTION READY / PUBLISHED.** Preview `6af0b61bce02902698c60467` and Production deployment published.
 
-| Gate | Status | Evidence |
+1. **LEMON-045 (Public GitHub & Student Footer Links)**:
+   - Public GitHub Repository: `https://github.com/Monty-sa/lemon-campus-pal` (public, MIT license, College of Business Administration scope).
+   - Verified footer links and copy:
+     - GitHub URL: `https://github.com/Monty-sa/lemon-campus-pal`
+     - Telegram URL: `https://t.me/Muntadar26`
+     - Arabic Telegram label: `"تواصل معي"`
+     - English Telegram label: `"Contact Me"`
+     - Arabic disclaimer: `"جهد طلابي، غير رسمي."`
+     - English disclaimer: `"Student effort, not official."`
+   - Attributes: `target="_blank" rel="noopener noreferrer"` enforced on all external links.
+   - Accessibility: keyboard `:focus-visible` styling, SVG icons marked `aria-hidden="true"`, accessible text and labels.
+   - Theme & Responsive: seamless light/dark theme adaptation and mobile flex-wrap.
+   - Netlify deployment remains independent of GitHub; no GitHub-to-Netlify webhook/automation activated.
+
+2. **Deployments & Rollback Targets**:
+   - Preview: `6af0b61bce02902698c60467` (`https://6af0b61bce02902698c60467--yourcampuspallemon.netlify.app`)
+   - Previous rollback targets: `6af0b406fd8b4559f09a240a`, `6af0a8bea32da10e37ca7557`, `6af0a39cbcd450d091c80407`.
+
+## LEMON-045 Evidence Matrix
+
+| Gate | Status | Verified Evidence |
 | --- | --- | --- |
-| Current-tree and one-commit history scan | PASS | Known local Supabase, OAuth, and HMAC credential values have zero matches in the publishable tree and existing commit. Ignored credential/config files remain outside the snapshot. |
-| Machine identity removal | PASS | Local Windows username references were removed from public release evidence while retaining ACL/task facts. |
-| Public repository files | PASS | README, placeholder-only environment template, CI, contribution guide, security policy, and safe ignore rules prepared. |
-| License | APPROVED | MIT applies to application source code only. `DATA_LICENSE.md` excludes KFU course data and other third-party material from that grant. |
-| Existing history privacy | APPROVED | The owner approved a fresh public root commit from the verified snapshot, leaving local history untouched. |
-| Disposable clean install and checks | PASS | `npm ci`; lint; typecheck; 43 files / 305 tests; Next.js production build; and `git diff --check` passed without private credentials. Production dependency audit: 0 findings. |
-| GitHub publication / footer / deployment | PENDING | No GitHub repository, footer edit, or deployment was created before the required approval gate. |
+| GitHub Repository | PASS | Public repo at `https://github.com/Monty-sa/lemon-campus-pal`, MIT license, verified README. |
+| Footer GitHub Link | PASS | Verified `https://github.com/Monty-sa/lemon-campus-pal`, `target="_blank" rel="noopener noreferrer"`. |
+| Footer Telegram Link | PASS | Verified `https://t.me/Muntadar26`, `target="_blank" rel="noopener noreferrer"`. |
+| Localized Telegram Labels | PASS | `"Contact Me"` (EN) and `"تواصل معي"` (AR) verified in component and deployed bundle. |
+| Concise Disclaimers | PASS | `"Student effort, not official."` (EN) and `"جهد طلابي، غير رسمي."` (AR) verified in component and deployed bundle. |
+| Automated Tests | PASS | `src/components/footer-links.test.tsx`: 2/2 passed. |
+| Types & Lint | PASS | `tsc --noEmit`: 0 errors. `npm run lint`: 0 errors. |
+| Packaging & Build | PASS | `npm run build` and `npx netlify build` exited code 0. |
+| Rollback Preservation | PRESERVED | Target `6af0b406fd8b4559f09a240a` and `6af0a8bea32da10e37ca7557` preserved. |
+
+---
 
 # LEMON-044 Student Professor Experiences Release Gate
 
