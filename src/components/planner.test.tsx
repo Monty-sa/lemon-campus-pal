@@ -404,7 +404,7 @@ describe("Authentication & Cloud Sync UI", () => {
     });
   }, 15000);
 
-  it("renders Admin link in topbar when user has verified admin role", async () => {
+  it("does not render Admin button in student navigation (owner bookmarks /admin directly)", async () => {
     const mockClient = createMockSupabase(
       { id: "admin-uuid-1", email: "admin@lemon.internal" },
       { username: "admin", display_name: "Admin User" },
@@ -413,9 +413,10 @@ describe("Authentication & Cloud Sync UI", () => {
     render(<Planner data={offerings} supabaseClient={mockClient} />);
 
     await waitFor(() => {
-      expect(screen.getByRole("link", { name: "Admin Dashboard" })).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Admin Dashboard" })).toHaveAttribute("href", "/admin");
+      expect(screen.getByText("admin@lemon.internal")).toBeInTheDocument();
     });
+    expect(screen.queryByRole("link", { name: "Admin Dashboard" })).not.toBeInTheDocument();
+    expect(document.querySelector("a[href='/admin']")).toBeNull();
   });
 
   it("provides guest mode privacy and data backup controls without large disruptive banner", async () => {

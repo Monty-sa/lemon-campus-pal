@@ -1077,6 +1077,196 @@ body, .topbar, .hero, .workspace, .catalog, .planner-panel, .course-group, .cour
   color: var(--danger);
   border: 1px solid #f9cac5;
 }
+.status-badge.warning {
+  background: #fefce8;
+  color: #a16207;
+  border: 1px solid #fde047;
+}
+
+/* LEMON-048: Owner Control Center & Observability */
+.admin-card.setup-required-card {
+  max-width: 640px;
+  text-align: start;
+}
+.setup-steps-box {
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0 24px;
+}
+.setup-steps-box h3 {
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.env-var-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.env-var-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+}
+.env-var-list li code {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--lemon-deep);
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  align-self: flex-start;
+}
+.setup-redirect-note {
+  border-top: 1px dashed var(--line);
+  padding-top: 12px;
+  font-size: 12px;
+}
+.setup-redirect-note pre {
+  margin-top: 6px;
+  background: var(--surface);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  overflow-x: auto;
+}
+.admin-brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.admin-alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  text-align: start;
+  font-size: 12.5px;
+}
+.admin-alert.danger {
+  background: #fdf0ed;
+  border: 1px solid #f9cac5;
+  color: var(--danger);
+}
+.admin-alert.warning {
+  background: #fefce8;
+  border: 1px solid #fde047;
+  color: #a16207;
+}
+.admin-alert p {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: inherit;
+}
+.google-oauth-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.google-oauth-btn:hover {
+  background: #f9fafb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.login-footer {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.admin-btn.text-link {
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 4px 8px;
+}
+.admin-btn.text-link:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+.admin-btn.danger-outline {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+.admin-btn.danger-outline:hover {
+  background: #fdf0ed;
+}
+.owner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+.owner-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+.badge-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.badge-pill.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.badge-pill.pending {
+  background: var(--surface-muted);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+.admin-link-action {
+  color: var(--brand-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+.admin-link-action:hover {
+  text-decoration: underline;
+}
+.empty-notice {
+  text-align: center;
+  padding: 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.setup-inline-hint {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.notice-row {
+  background: var(--surface-muted);
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
 
 /* Advanced Course Explorer (LEMON-011) */
 .explorer-filters-panel {

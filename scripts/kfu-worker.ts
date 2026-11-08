@@ -10,6 +10,7 @@ import {
   type KfuIngestPayload,
   type KfuIngestResponse,
 } from "../src/lib/kfu-monitor/types";
+import { sendBetterStackHeartbeat } from "../src/lib/monitoring/better-stack";
 
 // Configuration defaults
 const CONFIG = {
@@ -142,6 +143,40 @@ export function resolveApiEndpoint(): string {
   return "https://yourcampuspallemon.netlify.app/api/kfu/ingest";
 }
 
+export function resolveBetterStackHeartbeatUrl(): string | null {
+  if (process.env.BETTER_STACK_HEARTBEAT_URL) {
+    return process.env.BETTER_STACK_HEARTBEAT_URL.trim();
+  }
+
+  const localAppData = process.env.LOCALAPPDATA || path.join(process.env.USERPROFILE || "C:\\", "AppData", "Local");
+  const configPath = path.join(localAppData, "lemon-worker", "config.json");
+  if (fs.existsSync(configPath)) {
+    try {
+      const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
+      if (cfg.betterStackHeartbeatUrl) {
+        return cfg.betterStackHeartbeatUrl.trim();
+      }
+    } catch {
+      // Ignore
+    }
+  }
+
+  const envLocalPath = path.resolve(".env.local");
+  if (fs.existsSync(envLocalPath)) {
+    try {
+      const envText = fs.readFileSync(envLocalPath, "utf8");
+      const match = envText.match(/BETTER_STACK_HEARTBEAT_URL=([^\r\n]+)/);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    } catch {
+      // Ignore
+    }
+  }
+
+  return null;
+}
+
 // Polite HTTP fetch with bounded timeout and retries
 async function fetchSourceHtml(url: string, label: string): Promise<string> {
   let attempt = 0;
@@ -221,6 +256,7 @@ export async function runKfuWorker(options?: {
 
     const endpoint = options?.endpointOverride ?? resolveApiEndpoint();
     log("INFO", `Ingestion target endpoint: ${endpoint}`);
+    const heartbeatUrl = resolveBetterStackHeartbeatUrl();
 
     // 1. Fetch Male and Female HTML
     const maleTarget = KFU_BUSINESS_DATASETS["11"];
@@ -253,6 +289,7 @@ export async function runKfuWorker(options?: {
     if (!maleVal.isValid) {
       const msg = `Male snapshot validation failed: ${maleVal.failureReason}`;
       log("ERROR", msg);
+      if (heartbeatUrl) await sendBetterStackHeartbeat(heartbeatUrl, "fail", msg);
       return { exitCode: 1, summary: msg };
     }
 
@@ -260,6 +297,7 @@ export async function runKfuWorker(options?: {
     if (!femaleVal.isValid) {
       const msg = `Female snapshot validation failed: ${femaleVal.failureReason}`;
       log("ERROR", msg);
+      if (heartbeatUrl) await sendBetterStackHeartbeat(heartbeatUrl, "fail", msg);
       return { exitCode: 1, summary: msg };
     }
 
@@ -306,17 +344,24 @@ export async function runKfuWorker(options?: {
       const errText = await response.text();
       const msg = `Ingestion endpoint returned HTTP ${response.status} ${response.statusText}: ${errText}`;
       log("ERROR", msg);
+      if (heartbeatUrl) await sendBetterStackHeartbeat(heartbeatUrl, "fail", msg);
       return { exitCode: 3, summary: msg };
     }
 
     const ingestResult = (await response.json()) as KfuIngestResponse;
     const summary = `Successfully published snapshot ${ingestResult.version}: Male ${ingestResult.male.courseCount} courses / ${ingestResult.male.sectionCount} sections; Female ${ingestResult.female.courseCount} courses / ${ingestResult.female.sectionCount} sections.`;
     log("INFO", summary);
+    if (heartbeatUrl) {
+      await sendBetterStackHeartbeat(heartbeatUrl, "success", summary);
+      log("INFO", "Better Stack heartbeat emitted successfully.");
+    }
     log("INFO", "=== LEMON-039 KFU Refresh Worker Completed Successfully ===");
     return { exitCode: 0, summary };
   } catch (fatalErr: unknown) {
     const errorMsg = fatalErr instanceof Error ? fatalErr.message : String(fatalErr);
     log("ERROR", `Fatal worker error: ${errorMsg}`);
+    const heartbeatUrl = resolveBetterStackHeartbeatUrl();
+    if (heartbeatUrl) await sendBetterStackHeartbeat(heartbeatUrl, "fail", errorMsg);
     return { exitCode: 1, summary: errorMsg };
   } finally {
     releaseLock();

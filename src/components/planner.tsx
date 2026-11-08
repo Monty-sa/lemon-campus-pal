@@ -41,7 +41,6 @@ import {
 } from "@/lib/notifications/service";
 import type { InAppNotification } from "@/lib/notifications/types";
 import { isThemePreference, resolveTheme, THEME_STORAGE_KEY, type ThemePreference } from "@/lib/theme";
-import { isAdminUser } from "@/lib/cloud/admin";
 import { maleOfferings } from "@/data/male-offerings";
 import {
   getLanguageDirection,
@@ -274,7 +273,6 @@ export function Planner({
     document.documentElement.setAttribute("dir", getLanguageDirection(lang));
   }, [hydrated, lang]);
 
-  const [isAdmin, setIsAdmin] = useState(false);
   const [filters, setFilters] = useState<ExplorerFilters>(() => {
     if (typeof window === "undefined") {
       return {
@@ -530,11 +528,6 @@ export function Planner({
             if (mounted) setProfile(p);
           })
           .catch(() => {});
-        isAdminUser(supabase, currentUser.id)
-          .then((admin) => {
-            if (mounted) setIsAdmin(admin);
-          })
-          .catch(() => {});
         try {
           const result = await syncPlansOnLogin(scheduleStore, window.localStorage, plansAtAuthentication, currentUser.id);
           if (mounted && initialGeneration === identityGenerationRef.current) {
@@ -559,7 +552,6 @@ export function Planner({
       } else {
         setUser(null);
         setProfile(null);
-        setIsAdmin(false);
         setSyncStatus("guest");
         setAuthReady(true);
       }
@@ -584,11 +576,6 @@ export function Planner({
         ensureProfile(supabase, session.user)
           .then((p) => {
             if (mounted) setProfile(p);
-          })
-          .catch(() => {});
-        isAdminUser(supabase, session.user.id)
-          .then((admin) => {
-            if (mounted) setIsAdmin(admin);
           })
           .catch(() => {});
         try {
@@ -617,7 +604,6 @@ export function Planner({
         ++identityGenerationRef.current;
         setUser(null);
         setProfile(null);
-        setIsAdmin(false);
         setSettingsModalOpen(false);
         setGuestImportPromptOpen(false);
         setGuestImportModalOpen(false);
@@ -1142,16 +1128,6 @@ export function Planner({
               <span className={`sync-pill ${syncStatus}`} title={lang === "ar" ? "حالة المزامنة السحابية" : "Cloud sync status"}>
                 {syncStatus === "syncing" ? t.common.syncing : syncStatus === "error" ? t.common.syncFailed : t.common.synced}
               </span>
-              {isAdmin && (
-                <a
-                  href="/admin"
-                  className="admin-nav-link"
-                  aria-label={lang === "ar" ? "لوحة الإدارة" : "Admin Dashboard"}
-                  title={lang === "ar" ? "لوحة الإدارة" : "Admin Dashboard"}
-                >
-                  {lang === "ar" ? "لوحة الإدارة" : "Admin"}
-                </a>
-              )}
               <button
                 type="button"
                 className="ghost small icon-only"
