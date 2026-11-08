@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Public release safety gate: account/cloud features remain server- and client-disabled
+  # until migration 0006 and two-user RLS/OAuth checks pass in authorized staging.
+  NEXT_PUBLIC_GUEST_ONLY_MODE = "true"
+
+# LEMON-015 & LEMON-035: Automated KFU Section Monitoring
+# 60-minute recurring schedule (Netlify Scheduled Functions).
+# Safety Policy: Enforces isCronExecutionApproved() gate in netlify/functions/kfu-monitor.ts.
+[functions."kfu-monitor"]
+  schedule = "@hourly"

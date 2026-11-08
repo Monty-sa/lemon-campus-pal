@@ -1,0 +1,1964 @@
+{
+  "generatedAt": "2026-11-07T18:23:56.805Z",
+  "request": {
+    "sourceUrl": "https://ssb-ar.kfu.edu.sa/PROD_ar/ws?p_trm_code=144820&p_col_code=06&p_sex_code=11",
+    "status": 200,
+    "finalUrl": "https://ssb-ar.kfu.edu.sa/PROD_ar/ws?p_trm_code=144820&p_col_code=06&p_sex_code=11",
+    "contentType": "text/html;charset=UTF-8",
+    "htmlBytes": 1247938,
+    "htmlSha256": "7952e5b59722b9364d7568d87ee9ad2f7e54fdf20e6edeb5e03aab022c1292bc"
+  },
+  "snapshot": {
+    "path": "data/kfu-144820-06-11.json",
+    "importedAt": "2026-11-07T18:03:12.960Z",
+    "courses": 164,
+    "sections": 389
+  },
+  "live": {
+    "rawRows": 592,
+    "sections": 389
+  },
+  "fullComparison": {
+    "compared": 389,
+    "passed": 389,
+    "mismatches": [],
+    "snapshotOnlyCrns": []
+  },
+  "sample": {
+    "size": 30,
+    "passed": 30,
+    "traitCounts": {
+      "single-meeting": 17,
+      "named-instructor": 11,
+      "status-open": 11,
+      "activity-ا ختياري": 1,
+      "missing-meeting": 3,
+      "missing-instructor": 19,
+      "status-closed": 19,
+      "activity-theory": 29,
+      "multiple-meetings": 10
+    },
+    "rows": [
+      {
+        "crn": "86944",
+        "traits": [
+          "single-meeting",
+          "named-instructor",
+          "status-open",
+          "activity-ا ختياري"
+        ],
+        "raw": {
+          "crn": "86944",
+          "courseCode": "0677-308",
+          "courseTitle": "تطبيقات في تحليلات الاعمال",
+          "credits": 3,
+          "sectionCode": "K1",
+          "status": "open",
+          "instructor": "عبدالرحمن عبدالملك عبداللطيف ال شيخ مبارك",
+          "activity": "ا ختياري",
+          "meetings": [
+            {
+              "days": [
+                "mon",
+                "wed"
+              ],
+              "startMinutes": 840,
+              "endMinutes": 915,
+              "activity": "ا ختياري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "86944",
+          "courseCode": "0677-308",
+          "courseTitle": "تطبيقات في تحليلات الاعمال",
+          "credits": 3,
+          "sectionCode": "K1",
+          "status": "open",
+          "instructor": "عبدالرحمن عبدالملك عبداللطيف ال شيخ مبارك",
+          "activity": "ا ختياري",
+          "meetings": [
+            {
+              "days": [
+                "mon",
+                "wed"
+              ],
+              "startMinutes": 840,
+              "endMinutes": 915,
+              "activity": "ا ختياري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "53210",
+        "traits": [
+          "missing-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "53210",
+          "courseCode": "0603-302",
+          "courseTitle": "المحاسبة الادارية",
+          "credits": 3,
+          "sectionCode": "121",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": []
+        },
+        "normalized": {
+          "crn": "53210",
+          "courseCode": "0603-302",
+          "courseTitle": "المحاسبة الادارية",
+          "credits": 3,
+          "sectionCode": "121",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": []
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "57230",
+        "traits": [
+          "missing-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "57230",
+          "courseCode": "0606-490",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A2",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": []
+        },
+        "normalized": {
+          "crn": "57230",
+          "courseCode": "0606-490",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A2",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": []
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "57231",
+        "traits": [
+          "missing-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "57231",
+          "courseCode": "0606-490",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A3",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": []
+        },
+        "normalized": {
+          "crn": "57231",
+          "courseCode": "0606-490",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A3",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": []
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "63953",
+        "traits": [
+          "multiple-meetings",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "63953",
+          "courseCode": "0602-202",
+          "courseTitle": "إدارة العمليات",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 450,
+              "endMinutes": 525,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 629,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "63953",
+          "courseCode": "0602-202",
+          "courseTitle": "إدارة العمليات",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 450,
+              "endMinutes": 525,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 629,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "63988",
+        "traits": [
+          "multiple-meetings",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "63988",
+          "courseCode": "0602-305",
+          "courseTitle": "إدارة الأعمال الصغيرة",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "wed"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "mon"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "63988",
+          "courseCode": "0602-305",
+          "courseTitle": "إدارة الأعمال الصغيرة",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "wed"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "mon"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "64014",
+        "traits": [
+          "multiple-meetings",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "64014",
+          "courseCode": "0602-430",
+          "courseTitle": "التسويق الرقمي",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "wed"
+              ],
+              "startMinutes": 840,
+              "endMinutes": 915,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "mon"
+              ],
+              "startMinutes": 840,
+              "endMinutes": 915,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "64014",
+          "courseCode": "0602-430",
+          "courseTitle": "التسويق الرقمي",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "wed"
+              ],
+              "startMinutes": 840,
+              "endMinutes": 915,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "mon"
+              ],
+              "startMinutes": 840,
+              "endMinutes": 915,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "64042",
+        "traits": [
+          "multiple-meetings",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "64042",
+          "courseCode": "0602-431",
+          "courseTitle": "قضايا معاصره في التسويق",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "wed"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "mon"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "64042",
+          "courseCode": "0602-431",
+          "courseTitle": "قضايا معاصره في التسويق",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "wed"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "mon"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "84029",
+        "traits": [
+          "multiple-meetings",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "84029",
+          "courseCode": "0603-101",
+          "courseTitle": "مبادىء المحاسبة (1)",
+          "credits": 3,
+          "sectionCode": "02",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 960,
+              "endMinutes": 1035,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "mon"
+              ],
+              "startMinutes": 960,
+              "endMinutes": 1035,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "84029",
+          "courseCode": "0603-101",
+          "courseTitle": "مبادىء المحاسبة (1)",
+          "credits": 3,
+          "sectionCode": "02",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 960,
+              "endMinutes": 1035,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "mon"
+              ],
+              "startMinutes": 960,
+              "endMinutes": 1035,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "84028",
+        "traits": [
+          "multiple-meetings",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "84028",
+          "courseCode": "0603-101",
+          "courseTitle": "مبادىء المحاسبة (1)",
+          "credits": 3,
+          "sectionCode": "01",
+          "status": "open",
+          "instructor": "محمد سعد عبيد محمد",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 870,
+              "endMinutes": 945,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 960,
+              "endMinutes": 1035,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "84028",
+          "courseCode": "0603-101",
+          "courseTitle": "مبادىء المحاسبة (1)",
+          "credits": 3,
+          "sectionCode": "01",
+          "status": "open",
+          "instructor": "محمد سعد عبيد محمد",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 870,
+              "endMinutes": 945,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 960,
+              "endMinutes": 1035,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "77034",
+        "traits": [
+          "multiple-meetings",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "77034",
+          "courseCode": "0603-103",
+          "courseTitle": "ادارة المحاسبة والاعمال",
+          "credits": 3,
+          "sectionCode": "01",
+          "status": "open",
+          "instructor": "محمد عبدالرحمن العتيبي",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "77034",
+          "courseCode": "0603-103",
+          "courseTitle": "ادارة المحاسبة والاعمال",
+          "credits": 3,
+          "sectionCode": "01",
+          "status": "open",
+          "instructor": "محمد عبدالرحمن العتيبي",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "76074",
+        "traits": [
+          "multiple-meetings",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "76074",
+          "courseCode": "0603-302",
+          "courseTitle": "المحاسبة الادارية",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "open",
+          "instructor": "ابراهيم خالد أحمد المعيدي",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 630,
+              "endMinutes": 749,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "76074",
+          "courseCode": "0603-302",
+          "courseTitle": "المحاسبة الادارية",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "open",
+          "instructor": "ابراهيم خالد أحمد المعيدي",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 630,
+              "endMinutes": 749,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "78427",
+        "traits": [
+          "multiple-meetings",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "78427",
+          "courseCode": "0604-201",
+          "courseTitle": "إدارة مالية (1)",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "open",
+          "instructor": "حيدر القضيب",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 750,
+              "endMinutes": 825,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "tue",
+                "thu"
+              ],
+              "startMinutes": 750,
+              "endMinutes": 825,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "78427",
+          "courseCode": "0604-201",
+          "courseTitle": "إدارة مالية (1)",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "open",
+          "instructor": "حيدر القضيب",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 750,
+              "endMinutes": 825,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "tue",
+                "thu"
+              ],
+              "startMinutes": 750,
+              "endMinutes": 825,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "63808",
+        "traits": [
+          "multiple-meetings",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "63808",
+          "courseCode": "0604-202",
+          "courseTitle": "إدارة مالية (2)",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "open",
+          "instructor": "عبداللطيف عبدالرحمن النعيم",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "wed",
+                "thu"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "63808",
+          "courseCode": "0604-202",
+          "courseTitle": "إدارة مالية (2)",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "open",
+          "instructor": "عبداللطيف عبدالرحمن النعيم",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            },
+            {
+              "days": [
+                "wed",
+                "thu"
+              ],
+              "startMinutes": 540,
+              "endMinutes": 615,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "85169",
+        "traits": [
+          "single-meeting",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "85169",
+          "courseCode": "0602-207",
+          "courseTitle": "السلوك التنظيمي",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "open",
+          "instructor": "نواف الشراري",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 930,
+              "endMinutes": 1005,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "85169",
+          "courseCode": "0602-207",
+          "courseTitle": "السلوك التنظيمي",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "open",
+          "instructor": "نواف الشراري",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 930,
+              "endMinutes": 1005,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "53317",
+        "traits": [
+          "single-meeting",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "53317",
+          "courseCode": "0603-407",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A1",
+          "status": "open",
+          "instructor": "مصعب سعد احمد النعيم",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "53317",
+          "courseCode": "0603-407",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A1",
+          "status": "open",
+          "instructor": "مصعب سعد احمد النعيم",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "53937",
+        "traits": [
+          "single-meeting",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "53937",
+          "courseCode": "0603-407",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A2",
+          "status": "open",
+          "instructor": "خالد عبدالعزيز الملحم",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "53937",
+          "courseCode": "0603-407",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A2",
+          "status": "open",
+          "instructor": "خالد عبدالعزيز الملحم",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "53940",
+        "traits": [
+          "single-meeting",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "53940",
+          "courseCode": "0603-407",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A5",
+          "status": "open",
+          "instructor": "أحمد مبارك الراجح",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "53940",
+          "courseCode": "0603-407",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A5",
+          "status": "open",
+          "instructor": "أحمد مبارك الراجح",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "84691",
+        "traits": [
+          "single-meeting",
+          "named-instructor",
+          "status-open",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "84691",
+          "courseCode": "0604-205",
+          "courseTitle": "اساسيات البحث العلمي(المالية)",
+          "credits": 1,
+          "sectionCode": "A1",
+          "status": "open",
+          "instructor": "السعيدي محمد وصاف",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 1020,
+              "endMinutes": 1095,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "84691",
+          "courseCode": "0604-205",
+          "courseTitle": "اساسيات البحث العلمي(المالية)",
+          "credits": 1,
+          "sectionCode": "A1",
+          "status": "open",
+          "instructor": "السعيدي محمد وصاف",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "tue"
+              ],
+              "startMinutes": 1020,
+              "endMinutes": 1095,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "85170",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "85170",
+          "courseCode": "0602-302",
+          "courseTitle": "مبادىء التوريد",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "mon",
+                "wed"
+              ],
+              "startMinutes": 930,
+              "endMinutes": 1005,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "85170",
+          "courseCode": "0602-302",
+          "courseTitle": "مبادىء التوريد",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "mon",
+                "wed"
+              ],
+              "startMinutes": 930,
+              "endMinutes": 1005,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "85168",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "85168",
+          "courseCode": "0602-303",
+          "courseTitle": "إدارة الأعمال الدولية",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 630,
+              "endMinutes": 705,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "85168",
+          "courseCode": "0602-303",
+          "courseTitle": "إدارة الأعمال الدولية",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 630,
+              "endMinutes": 705,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "63965",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "63965",
+          "courseCode": "0602-304",
+          "courseTitle": "الإدارة الإستراتيجية",
+          "credits": 3,
+          "sectionCode": "T3",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "mon",
+                "wed"
+              ],
+              "startMinutes": 750,
+              "endMinutes": 825,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "63965",
+          "courseCode": "0602-304",
+          "courseTitle": "الإدارة الإستراتيجية",
+          "credits": 3,
+          "sectionCode": "T3",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "mon",
+                "wed"
+              ],
+              "startMinutes": 750,
+              "endMinutes": 825,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "85174",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "85174",
+          "courseCode": "0602-331",
+          "courseTitle": "التسويق الاستراتيجي",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 750,
+              "endMinutes": 825,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "85174",
+          "courseCode": "0602-331",
+          "courseTitle": "التسويق الاستراتيجي",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 750,
+              "endMinutes": 825,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "85172",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "85172",
+          "courseCode": "0602-332",
+          "courseTitle": "سلوك المستهلك",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "mon",
+                "wed"
+              ],
+              "startMinutes": 1020,
+              "endMinutes": 1095,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "85172",
+          "courseCode": "0602-332",
+          "courseTitle": "سلوك المستهلك",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "mon",
+                "wed"
+              ],
+              "startMinutes": 1020,
+              "endMinutes": 1095,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "85173",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "85173",
+          "courseCode": "0602-401",
+          "courseTitle": "إدارة المشاريع",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 1020,
+              "endMinutes": 1095,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "85173",
+          "courseCode": "0602-401",
+          "courseTitle": "إدارة المشاريع",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 1020,
+              "endMinutes": 1095,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "85171",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "85171",
+          "courseCode": "0602-402",
+          "courseTitle": "أخلاقيات الأعمال",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 1110,
+              "endMinutes": 1185,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "85171",
+          "courseCode": "0602-402",
+          "courseTitle": "أخلاقيات الأعمال",
+          "credits": 3,
+          "sectionCode": "T1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "sun",
+                "tue"
+              ],
+              "startMinutes": 1110,
+              "endMinutes": 1185,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "53318",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "53318",
+          "courseCode": "0602-499",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "53318",
+          "courseCode": "0602-499",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A1",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "53930",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "53930",
+          "courseCode": "0602-499",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A2",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1140,
+              "endMinutes": 1200,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "53930",
+          "courseCode": "0602-499",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A2",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1140,
+              "endMinutes": 1200,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "53931",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "53931",
+          "courseCode": "0602-499",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A3",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "53931",
+          "courseCode": "0602-499",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A3",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      },
+      {
+        "crn": "53932",
+        "traits": [
+          "single-meeting",
+          "missing-instructor",
+          "status-closed",
+          "activity-theory"
+        ],
+        "raw": {
+          "crn": "53932",
+          "courseCode": "0602-499",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A4",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "normalized": {
+          "crn": "53932",
+          "courseCode": "0602-499",
+          "courseTitle": "التدريب التعاوني",
+          "credits": 6,
+          "sectionCode": "A4",
+          "status": "closed",
+          "activity": "نظري",
+          "meetings": [
+            {
+              "days": [
+                "thu"
+              ],
+              "startMinutes": 1200,
+              "endMinutes": 1220,
+              "activity": "نظري"
+            }
+          ]
+        },
+        "fieldResults": {
+          "crn": true,
+          "courseCode": true,
+          "courseTitle": true,
+          "credits": true,
+          "sectionCode": true,
+          "status": true,
+          "instructor": true,
+          "activity": true,
+          "meetings": true
+        },
+        "pass": true
+      }
+    ]
+  }
+}
