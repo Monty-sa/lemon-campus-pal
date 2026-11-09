@@ -1,9 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { offerings } from "@/data/offerings";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
 import { Planner } from "./planner";
+
+const lightweightAuthTestData = { ...offerings, courses: [], sections: [] };
 
 function mockMatchMedia(prefersDark: boolean) {
   Object.defineProperty(window, "matchMedia", {
@@ -301,8 +303,16 @@ describe("Authentication & Cloud Sync UI", () => {
       .mockImplementationOnce(() => accountAResult)
       .mockImplementationOnce(() => accountBResult);
 
-    render(<Planner data={offerings} supabaseClient={mockClient} />);
+    render(<Planner data={lightweightAuthTestData} supabaseClient={mockClient} />);
     await waitFor(() => expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument());
+
+    // Drain the mount-time getUser lookup before replacing its result for the
+    // simulated account-switch events below. Otherwise worker load can let the
+    // initial lookup observe account A and consume the deferred A response.
+    const initialUserLookup = (mockClient.auth.getUser as ReturnType<typeof vi.fn>).mock.results[0]?.value;
+    await act(async () => {
+      await initialUserLookup;
+    });
 
     const userA = { id: "11111111-1111-4111-8111-111111111111", email: "a@example.com" };
     const userB = { id: "22222222-2222-4222-8222-222222222222", email: "b@example.com" };
@@ -360,7 +370,7 @@ describe("Authentication & Cloud Sync UI", () => {
       error: new Error("Google OAuth configuration error"),
     });
 
-    render(<Planner data={offerings} supabaseClient={mockClient} />);
+    render(<Planner data={lightweightAuthTestData} supabaseClient={mockClient} />);
     const signInBtn = await screen.findByRole("button", { name: "Sign in" });
     fireEvent.click(signInBtn);
 
