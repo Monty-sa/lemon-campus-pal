@@ -4,6 +4,31 @@ import { RegistrationGuideModal } from "./registration-guide-modal";
 import { getTranslations } from "@/lib/i18n";
 
 describe("LEMON-045: Registration Guide Email Integration", () => {
+  it("shows the cohort schedule and Banner / informal guidance in both languages", () => {
+    const { rerender } = render(<RegistrationGuideModal isOpen onClose={() => {}} lang="en" t={en} />);
+    expect(screen.getByText("2023 and earlier")).toBeInTheDocument();
+    expect(screen.getByText("Sun, Nov 8, 2026")).toBeInTheDocument();
+    expect(screen.getByText("Nov 13–19, 2026")).toBeInTheDocument();
+    expect(screen.getByText(/Official registration takes place through Banner/)).toBeInTheDocument();
+    expect(screen.getByText(/not an official university rule or a guarantee/i)).toBeInTheDocument();
+    rerender(<RegistrationGuideModal isOpen onClose={() => {}} lang="ar" t={ar} />);
+    expect(screen.getByText("دفعة ٢٠٢٣ وما قبلها")).toBeInTheDocument();
+    expect(screen.getByText("الأحد ٨ نوفمبر ٢٠٢٦")).toBeInTheDocument();
+    expect(screen.queryByText("Sunday")).not.toBeInTheDocument();
+  });
+
+  it("shows cohort dates, Banner registration, and the informal advisory bilingually", () => {
+    const { rerender } = render(<RegistrationGuideModal isOpen onClose={() => {}} lang="en" t={en} />);
+    expect(screen.getByText("2023 and earlier")).toBeInTheDocument();
+    expect(screen.getByText("Sun, Nov 8, 2026")).toBeInTheDocument();
+    expect(screen.getByText("Nov 13–19, 2026")).toBeInTheDocument();
+    expect(screen.getByText(/Official registration takes place through Banner/)).toBeInTheDocument();
+    expect(screen.getByText(/not an official university rule or a guarantee/i)).toBeInTheDocument();
+    rerender(<RegistrationGuideModal isOpen onClose={() => {}} lang="ar" t={ar} />);
+    expect(screen.getByText("دفعة ٢٠٢٣ وما قبلها")).toBeInTheDocument();
+    expect(screen.getByText("الأحد ٨ نوفمبر ٢٠٢٦")).toBeInTheDocument();
+  });
+
   const en = getTranslations("en");
   const ar = getTranslations("ar");
 

@@ -37,6 +37,16 @@ describe("English interface", () => {
     expect(screen.getAllByText(/Time TBA/i)).toHaveLength(6);
   });
 
+  it("shows both canonical meeting days in the CRN 63030 card summary", async () => {
+    const section = offerings.sections.find((item) => item.crn === "63030")!;
+    const data = { ...offerings, sections: [section], courses: offerings.courses.filter((course) => course.id === section.courseId) };
+    const { container } = render(<Planner data={data} />);
+    await waitFor(() => expect(container.querySelector(".section-summary-meeting")).toBeInTheDocument());
+    const summary = container.querySelector(".section-summary")!;
+    expect(summary).toHaveTextContent("Sun");
+    expect(summary).toHaveTextContent("Tue");
+  });
+
   it("copies selected CRNs and displays direct schedule download dropdown (LEMON-018)", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
@@ -656,6 +666,44 @@ describe("Authentication & Cloud Sync UI", () => {
   });
 
   describe("Arabic/English Localization & Segmented Selector (LEMON-021)", () => {
+    it("uses the Arabic default name for a new guest plan", async () => {
+      window.localStorage.setItem("lemon.language.v1", "ar");
+
+      render(<Planner supabaseClient={null} />);
+
+      await waitFor(() => {
+        expect(document.documentElement.getAttribute("dir")).toBe("rtl");
+        expect(document.querySelector<HTMLInputElement>("#plan-name-input")?.value).toBe("خطتي 1");
+      });
+    });
+
+    it("formats stale snapshot ages in the selected locale without duplicated English ago", async () => {
+      const { container } = render(<Planner supabaseClient={null} />);
+
+      await waitFor(() => expect(document.body).not.toHaveTextContent(/ago ago/i));
+      const arabicButton = container.querySelector<HTMLButtonElement>(".language-switcher button");
+      expect(arabicButton).not.toBeNull();
+      fireEvent.click(arabicButton!);
+
+      await waitFor(() => {
+        expect(document.documentElement.getAttribute("dir")).toBe("rtl");
+        expect(document.body).not.toHaveTextContent(/\d+[mhd] ago/i);
+      });
+    });
+
+    it("restores a saved Arabic locale after hydration without changing the initial render locale", async () => {
+      window.localStorage.setItem("lemon.language.v1", "ar");
+
+      render(<Planner supabaseClient={null} />);
+
+      await waitFor(() => {
+        expect(document.documentElement.getAttribute("lang")).toBe("ar");
+        expect(document.documentElement.getAttribute("dir")).toBe("rtl");
+      });
+      expect(window.localStorage.getItem("lemon.language.v1")).toBe("ar");
+      expect(screen.getByRole("button", { name: "English" })).toBeInTheDocument();
+    });
+
     it("switches language between English and Arabic, updating layout direction, translations and storage", async () => {
       render(<Planner supabaseClient={null} />);
       await waitFor(() => expect(screen.getAllByText(/Business Course Catalog|Browse sections/)[0]).toBeInTheDocument());

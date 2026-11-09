@@ -120,9 +120,9 @@ function formatDateTime(value: string, lang: Language = "en") {
   return new Intl.DateTimeFormat(lang === "ar" ? "ar-SA" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
-function newPlan(termId: string, sequence = 1): SchedulePlan {
+function newPlan(termId: string, sequence = 1, lang: Language = getStoredLanguage()): SchedulePlan {
   const now = new Date().toISOString();
-  return { id: crypto.randomUUID(), name: `My Plan ${sequence}`, termId, sectionIds: [], createdAt: now, updatedAt: now };
+  return { id: crypto.randomUUID(), name: getTranslations(lang).planner.planDefaultName(sequence), termId, sectionIds: [], createdAt: now, updatedAt: now };
 }
 
 function sectionLabel(section: Section, course: Course, lang: Language = "en") {
@@ -290,6 +290,7 @@ export function Planner({
     };
   });
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const courseSearchRef = useRef<HTMLInputElement>(null);
 
   // LEMON-011C: Explorer Table / Card View Mode & Table Sorting
   const [viewMode, setViewMode] = useState<ExplorerViewMode>(() => {
@@ -392,6 +393,11 @@ export function Planner({
       // Gracefully handle storage errors
     }
     setOnboardingOpen(false);
+    window.setTimeout(() => {
+      const search = courseSearchRef.current;
+      if (search && typeof search.scrollIntoView === "function") search.scrollIntoView({ behavior: "smooth", block: "center" });
+      search?.focus({ preventScroll: true });
+    }, 0);
   }
 
   // LEMON-026: Registration Guidance Modal
@@ -861,7 +867,7 @@ export function Planner({
   }
 
   function addPlan() {
-    const plan = newPlan(data.term.id, plans.length + 1);
+    const plan = newPlan(data.term.id, plans.length + 1, lang);
     setPlans((current) => [...current, plan]);
     setActivePlanId(plan.id);
     setToast(t.planner.planCreatedToast);
@@ -940,7 +946,7 @@ export function Planner({
   function handleConfirmClearGuest() {
     if (typeof window === "undefined") return;
     clearGuestStorage(window.localStorage);
-    const freshPlan = newPlan(data.term.id);
+    const freshPlan = newPlan(data.term.id, 1, lang);
     setPlans([freshPlan]);
     setActivePlanId(freshPlan.id);
     setConfirmClearGuestOpen(false);
@@ -1056,7 +1062,7 @@ export function Planner({
   }
 
   if (!hydrated || !activePlan) {
-    return <main className="loading"><span className="lemon-mark">L</span><p>{t.common.loading}</p></main>;
+    return <main className="loading"><span className="lemon-mark">L</span><p>{getTranslations("en").common.loading}</p></main>;
   }
 
   const credits = calculateCredits(selectedSections, data.courses);
@@ -1498,7 +1504,7 @@ export function Planner({
               <span className="catalog-status-divider">·</span>
               <span className="catalog-status-meta-item" title={formatDate(liveMetadata?.lastPublishedSnapshot || data.importedAt, lang)}>
                 {lang === "ar"
-                  ? `آخر تحديث: ${getRelativeTimeDescription(liveMetadata?.lastPublishedSnapshot || data.importedAt)}`
+                  ? `آخر تحديث: ${getRelativeTimeDescription(liveMetadata?.lastPublishedSnapshot || data.importedAt, undefined, lang)}`
                   : `Updated ${getRelativeTimeDescription(liveMetadata?.lastPublishedSnapshot || data.importedAt)}`}
               </span>
             </div>
@@ -1570,7 +1576,7 @@ export function Planner({
               }}
             >
               <span>⚠️</span>
-              <span>{t.planner.staleSnapshotBanner(freshnessInfo.relativeAgeLabel, formatDate(data.importedAt, lang))}</span>
+              <span>{t.planner.staleSnapshotBanner(getRelativeTimeDescription(data.importedAt, undefined, lang), formatDate(data.importedAt, lang))}</span>
             </div>
           )}
 
@@ -1666,6 +1672,7 @@ export function Planner({
                 <Icon name="search"/>
                 <input
                   id="course-search-input"
+                  ref={courseSearchRef}
                   value={filters.query}
                   onChange={(event) => updateFilter("query", event.target.value)}
                   placeholder={t.filters.searchCatalogPlaceholder}
@@ -2214,9 +2221,9 @@ export function Planner({
                                 </span>
                                 <span className="section-summary-meta">
                                   <span className={`section-time ${section.meetings.length === 0 ? "tba-badge" : ""}`}>
-                                    {section.meetings[0] ? (
+                                    {section.meetings.length > 0 ? (
                                       <>
-                                        {section.meetings[0].days.map((d) => t.planner.daysShort[d] ?? d).join(", ")} · <bdi dir="ltr">{formatTime(section.meetings[0].startMinutes)}–{formatTime(section.meetings[0].endMinutes)}</bdi>
+                                        {section.meetings.map((meeting) => <span key={meeting.id} className="section-summary-meeting">{meeting.days.map((d) => t.planner.daysShort[d] ?? d).join(", ")} · <bdi dir="ltr">{formatTime(meeting.startMinutes)}–{formatTime(meeting.endMinutes)}</bdi></span>)}
                                       </>
                                     ) : (
                                       lang === "ar" ? "الوقت غير محدد (TBA)" : "Time TBA"
@@ -2754,7 +2761,7 @@ export function Planner({
                   </span>
                 </div>
                 <p>
-                  {selectedCategory === "12" ? (lang === "ar" ? "طالبات" : "Female") : (lang === "ar" ? "طلاب" : "Male")} · {data.courses.length} {lang === "ar" ? "مقرر" : "courses"} · {data.sections.length} {lang === "ar" ? "شعبة" : "sections"} · {lang === "ar" ? `آخر تحديث: ${getRelativeTimeDescription(liveMetadata?.lastPublishedSnapshot || data.importedAt)}` : `Updated ${getRelativeTimeDescription(liveMetadata?.lastPublishedSnapshot || data.importedAt)}`}
+                  {selectedCategory === "12" ? (lang === "ar" ? "طالبات" : "Female") : (lang === "ar" ? "طلاب" : "Male")} · {data.courses.length} {lang === "ar" ? "مقرر" : "courses"} · {data.sections.length} {lang === "ar" ? "شعبة" : "sections"} · {lang === "ar" ? `آخر تحديث: ${getRelativeTimeDescription(liveMetadata?.lastPublishedSnapshot || data.importedAt, undefined, lang)}` : `Updated ${getRelativeTimeDescription(liveMetadata?.lastPublishedSnapshot || data.importedAt)}`}
                 </p>
                 <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "4px", marginBottom: 0 }}>
                   ℹ️ {t.statusDialog.catalogPortalNote}
@@ -2770,7 +2777,7 @@ export function Planner({
                       fontSize: "13px",
                     }}
                   >
-                    <strong>⚠️ {t.statusDialog.staleDataAlert(freshnessInfo.relativeAgeLabel)}</strong>
+                    <strong>⚠️ {t.statusDialog.staleDataAlert(getRelativeTimeDescription(data.importedAt, undefined, lang))}</strong>
                   </div>
                 )}
               </div>
@@ -3127,7 +3134,7 @@ export function Planner({
           }
         }}
         onClearDataSuccess={() => {
-          const freshPlan = newPlan(data.term.id);
+          const freshPlan = newPlan(data.term.id, 1, lang);
           setPlans([freshPlan]);
           setActivePlanId(freshPlan.id);
         }}

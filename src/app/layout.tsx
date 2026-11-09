@@ -5,9 +5,13 @@ import { LANGUAGE_INIT_SCRIPT } from "@/lib/i18n";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LEMON · Your Campus Pal.",
-  description: "Plan your semester. Your way. An independent schedule planner for King Faisal University students.",
+  metadataBase: new URL("https://lemoncampus.org"),
+  title: "LEMON | Your Campus Pal",
+  description: "Plan your KFU semester in Arabic or English. Explore courses, compare sections, and build a timetable.",
   applicationName: "LEMON",
+  openGraph: { type: "website", url: "https://lemoncampus.org", siteName: "LEMON", title: "LEMON | Your Campus Pal", description: "Plan your KFU semester in Arabic or English.", images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "LEMON · Your Campus Pal" }] },
+  twitter: { card: "summary_large_image", title: "LEMON | Your Campus Pal", description: "Plan your KFU semester in Arabic or English.", images: ["/opengraph-image.png"] },
+  icons: { icon: "/favicon.svg", apple: "/apple-icon.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

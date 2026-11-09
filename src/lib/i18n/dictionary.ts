@@ -167,7 +167,7 @@ export const en: Translations = {
     guestImportModalTitle: "Import Guest Schedules to Account",
     guestImportConfirmButton: (count: number) => `Import ${count} Plan(s) to Account`,
     guestImportSuccessToast: "Guest schedules imported to your account! 🎉",
-    staleSnapshotBanner: (hours: string, date: string) => `⚠️ Snapshot Notice: Catalog data reflects the published snapshot from ${date} (${hours} ago). Automated live polling is paused pending official permissions. Seat availability may differ from the university portal.`,
+    staleSnapshotBanner: (relativeAge: string, date: string) => `⚠️ Snapshot Notice: Catalog data reflects the published snapshot from ${date} (${relativeAge}). Automated live polling is paused pending official permissions. Seat availability may differ from the university portal.`,
   },
   categorySelector: {
     label: "Student Category",
@@ -417,7 +417,7 @@ export const en: Translations = {
     lastAttemptedCheckValue: "None (Automated polling disabled pending authorization)",
     refreshPolicyLabel: "Refresh policy",
     refreshPolicyValue: "Server-side scheduled execution (paused, awaiting university approval)",
-    staleDataAlert: (hours: string) => `Data snapshot is over ${hours} old. Live polling of KFU servers is currently disabled.`,
+    staleDataAlert: (relativeAge: string) => `Data snapshot: ${relativeAge}. Live polling of KFU servers is currently disabled.`,
   },
   auth: {
     modalTitle: "Sign In / Register",
@@ -875,7 +875,7 @@ export const ar: Translations = {
     guestImportModalTitle: "استيراد جداول الزائر إلى الحساب",
     guestImportConfirmButton: (count: number) => `استيراد ${count} خطة إلى حسابي`,
     guestImportSuccessToast: "تم استيراد الجداول إلى حسابك بنجاح! 🎉",
-    staleSnapshotBanner: (hours: string, date: string) => `⚠️ تنبيه النسخة المؤرشفة: المقررات والشعب المعروضة تعكس آخر نسخة منشورة بتاريخ ${date} (منذ ${hours}). التحديث الدوري التلقائي متوقف حالياً بانتظار استكمال التصاريح الرسمية. حالة توفر المقاعد قد تختلف عن نظام التسجيل الجامعي المباشر.`,
+    staleSnapshotBanner: (relativeAge: string, date: string) => `⚠️ تنبيه النسخة المؤرشفة: المقررات والشعب المعروضة تعكس آخر نسخة منشورة بتاريخ ${date} (${relativeAge}). التحديث الدوري التلقائي متوقف حالياً بانتظار استكمال التصاريح الرسمية. حالة توفر المقاعد قد تختلف عن نظام التسجيل الجامعي المباشر.`,
   },
   categorySelector: {
     label: "فئة الطلاب",
@@ -1125,7 +1125,7 @@ export const ar: Translations = {
     lastAttemptedCheckValue: "لا يوجد (الفحص الدوري التلقائي معطّل بانتظار التصريح)",
     refreshPolicyLabel: "سياسة التحديث",
     refreshPolicyValue: "جدولة خادم دورية (متوقفة بانتظار الحصول على تصريح الجامعة)",
-    staleDataAlert: (hours: string) => `لقطة البيانات مضى عليها أكثر من ${hours}. التحديث التلقائي لخوادم الجامعة متوقف حالياً.`,
+    staleDataAlert: (relativeAge: string) => `لقطة البيانات ${relativeAge}. التحديث التلقائي لخوادم الجامعة متوقف حالياً.`,
   },
   auth: {
     modalTitle: "تسجيل الدخول / إنشاء حساب",
@@ -1172,7 +1172,7 @@ export const ar: Translations = {
     displayNameLabel: "الاسم المعروض",
     displayNamePlaceholder: "اسمك الكريم",
     usernameLabel: "اسم المستخدم",
-    usernamePlaceholder: "username",
+    usernamePlaceholder: "اسم المستخدم",
     saveProfile: "حفظ التغييرات",
     saveSuccess: "تم تحديث الملف الشخصي بنجاح!",
     usernameRequirements: "من 3 إلى 20 حرفاً: حروف إنجليزية، أرقام، وشرطات.",

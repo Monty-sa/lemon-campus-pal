@@ -1,9 +1,19 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { offerings } from "@/data/offerings";
-import { AutoSchedulePanel } from "./auto-schedule-panel";
+import { AutoSchedulePanel, localizeScheduleReason } from "./auto-schedule-panel";
 
 describe("AutoSchedulePanel", () => {
+  it("localizes every generated schedule reason in Arabic", () => {
+    const reasons = ["3 campus days", "2 preferred instructor matches", "Preferred start time met", "Gaps minimized"];
+    for (const reason of reasons) {
+      const localized = localizeScheduleReason(reason, "ar");
+      expect(localized).toMatch(/[\u0600-\u06ff]/);
+      expect(localized).not.toBe(reason);
+    }
+    expect(localizeScheduleReason("3 campus days", "en")).toBe("3 campus days");
+  });
+
   it("renders course selection, hard constraints, and localized controls", () => {
     render(<AutoSchedulePanel data={offerings} lang="en" onSave={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Generate schedules" }));

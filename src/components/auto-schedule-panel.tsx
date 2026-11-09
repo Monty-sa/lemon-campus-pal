@@ -15,6 +15,18 @@ import { getDepartmentLabel } from "@/lib/explorer-filters";
 
 const ALL_DAYS: Day[] = ["sun", "mon", "tue", "wed", "thu"];
 
+export function localizeScheduleReason(reason: string, lang: Language): string {
+  if (lang !== "ar") return reason;
+  const number = (value: string) => new Intl.NumberFormat("ar-SA").format(Number(value));
+  const days = reason.match(/^(\d+) campus days$/);
+  if (days) return `${number(days[1])} أيام دوام`;
+  const instructors = reason.match(/^(\d+) preferred instructor match(?:es)?$/);
+  if (instructors) return `${number(instructors[1])} تطابق مع أستاذ مفضّل`;
+  if (reason === "Preferred start time met") return "وقت البدء المفضّل";
+  if (reason === "Gaps minimized") return "تقليل الفجوات بين المحاضرات";
+  return reason;
+}
+
 const EARLIEST_START_CHOICES = [
   { value: null, labelEn: "No limit", labelAr: "بدون حد" },
   { value: 420, labelEn: "07:00 AM", labelAr: "07:00 ص" },
@@ -946,7 +958,7 @@ export function AutoSchedulePanel({ data, lang, onSave, t: externalTranslations 
                           <div className="result-reasons-wrap">
                             {result.reasons.map((reason, rIdx) => (
                               <span className="result-reason-tag" key={rIdx}>
-                                ✓ {reason}
+                                ✓ {localizeScheduleReason(reason, lang)}
                               </span>
                             ))}
                           </div>

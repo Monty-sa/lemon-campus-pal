@@ -16,8 +16,8 @@ self.addEventListener("push", (event) => {
 
   const options = {
     body: data.body,
-    icon: "/favicon.ico",
-    badge: "/favicon.ico",
+    icon: "/notification-icon.png",
+    badge: "/notification-icon.png",
     data: { url: data.url || "/" },
     requireInteraction: false,
     tag: data.tag || "lemon-section-alert",

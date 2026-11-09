@@ -47,6 +47,21 @@ export function RegistrationGuideModal({
         </header>
 
         <div className="reg-guide-body">
+          <section className="reg-guide-section registration-window-section" aria-labelledby="registration-windows-title">
+            <h3 className="reg-guide-heading" id="registration-windows-title">{lang === "ar" ? "مواعيد التسجيل للفصل الثاني ١٤٤٨هـ" : "Semester 2, 1448 AH registration dates"}</h3>
+            <p className="reg-guide-subtext">{lang === "ar" ? "يبدأ التسجيل الساعة ٦:٠٠ مساءً بتوقيت السعودية (Asia/Riyadh). لكل دفعة منفردة (٢٠٢٣ وما قبلها، و٢٠٢٤–٢٠٢٧) نافذة مدتها ٢٤ ساعة. أما فترة جميع الدفعات فتستمر من ١٣ إلى ١٩ نوفمبر دون حد ٢٤ ساعة. التسجيل الرسمي عبر نظام Banner." : "Registration opens at 6:00 PM Saudi time (Asia/Riyadh). Each individual cohort (2023 and earlier, and 2024–2027) has a 24-hour window. The all-cohort period runs Nov 13–19 without a 24-hour limit. Official registration takes place through Banner."}</p>
+            <div className="registration-window-grid">
+              {[
+                ["2023-and-earlier", lang === "ar" ? "دفعة ٢٠٢٣ وما قبلها" : "2023 and earlier", "2026-11-08", lang === "ar" ? "الأحد ٨ نوفمبر ٢٠٢٦" : "Sun, Nov 8, 2026"],
+                ["2024", lang === "ar" ? "دفعة ٢٠٢٤" : "2024 cohort", "2026-11-09", lang === "ar" ? "الاثنين ٩ نوفمبر ٢٠٢٦" : "Mon, Nov 9, 2026"],
+                ["2025", lang === "ar" ? "دفعة ٢٠٢٥" : "2025 cohort", "2026-11-10", lang === "ar" ? "الثلاثاء ١٠ نوفمبر ٢٠٢٦" : "Tue, Nov 10, 2026"],
+                ["2026", lang === "ar" ? "دفعة ٢٠٢٦" : "2026 cohort", "2026-11-11", lang === "ar" ? "الأربعاء ١١ نوفمبر ٢٠٢٦" : "Wed, Nov 11, 2026"],
+                ["2027", lang === "ar" ? "دفعة ٢٠٢٧" : "2027 cohort", "2026-11-12", lang === "ar" ? "الخميس ١٢ نوفمبر ٢٠٢٦" : "Thu, Nov 12, 2026"],
+              ].map(([id, cohort, date, label]) => <div className="registration-window-card" key={id}><b>{cohort}</b><time dateTime={`${date}T18:00:00+03:00`}>{label}</time><span>6:00 PM · UTC+3</span></div>)}
+              <div className="registration-window-card all-cohorts"><b>{lang === "ar" ? "جميع الدفعات" : "All cohorts"}</b><time dateTime="2026-11-13T18:00:00+03:00">{lang === "ar" ? "١٣–١٩ نوفمبر ٢٠٢٦" : "Nov 13–19, 2026"}</time><span>{lang === "ar" ? "تبدأ ٦:٠٠ مساءً في ١٣ نوفمبر وتستمر حتى ١٩ نوفمبر · بتوقيت السعودية" : "Opens Nov 13 at 6:00 PM and remains available through Nov 19 · Saudi time"}</span></div>
+            </div>
+            <p className="registration-informal-note">{lang === "ar" ? "نصيحة غير رسمية من بعض أعضاء هيئة التدريس بكلية إدارة الأعمال: عند الإمكان، يُستحسن اختيار رمز الشعبة نفسه (مثل K1) للمقررات المختلفة لتقليل احتمال حدوث مشكلات عند تأكيد التسجيل. هذه نصيحة غير رسمية وليست قاعدة جامعية أو ضماناً، ولا يعتبر ليمون اختلاف الرموز تعارضاً." : "Informal faculty advice: Some College of Business faculty suggest choosing the same section code across courses when feasible (for example, K1) to reduce possible issues when confirming registration. This is not an official university rule or a guarantee. LEMON does not treat mixed codes as a conflict."}</p>
+          </section>
           {/* Section 1: Availability Status Signals */}
           <div className="reg-guide-section">
             <h3 className="reg-guide-heading">{t.regGuide.statusSectionTitle}</h3>
@@ -94,7 +109,7 @@ export function RegistrationGuideModal({
                 <div key={day.code} className="guide-day-card">
                   <span className="guide-day-code">{day.code}</span>
                   <span className="guide-day-name">{day.name}</span>
-                  <span className="guide-day-en">{day.en}</span>
+                  {lang === "en" && <span className="guide-day-en">{day.en}</span>}
                 </div>
               ))}
             </div>

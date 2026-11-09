@@ -189,6 +189,7 @@ describe("KFU Freshness Signals", () => {
     expect(getRelativeTimeDescription("2026-11-07T11:30:00Z", now)).toBe("30m ago");
     expect(getRelativeTimeDescription("2026-11-07T08:00:00Z", now)).toBe("4h ago");
     expect(getRelativeTimeDescription("2026-11-05T12:00:00Z", now)).toBe("2d ago");
+    expect(getRelativeTimeDescription("2026-11-07T08:00:00Z", now, "ar")).toBe("قبل ٤ ساعة");
   });
 
   it("computes freshness status accurately based on age thresholds", () => {

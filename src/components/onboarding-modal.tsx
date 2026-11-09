@@ -139,7 +139,7 @@ export function OnboardingModal({
             onClick={onComplete}
             aria-label={t.onboarding.getStarted}
           >
-            {t.onboarding.getStarted}
+            {lang === "ar" ? "ابدأ باختيار المقررات" : "Start choosing courses"}
           </button>
         </footer>
       </div>
