@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { SchedulePlan } from "../schema";
-import { GUEST_STORAGE_KEY, loadGuestPlans, loadPlans, loadUserPlans, STORAGE_KEY } from "../storage";
+import { GUEST_STORAGE_KEY, loadGuestPlans, loadPlans, loadUserPlans, loadPendingPlanSyncRecords, savePendingPlanSyncRecord, STORAGE_KEY } from "../storage";
 import {
   importGuestPlansToAccount,
   restoreGuestPlansOnLogout,
@@ -45,6 +45,44 @@ describe("syncPlansOnLogin (STRICT PRIVACY & ISOLATION POLICY)", () => {
     expect(store.upsert).toHaveBeenCalledWith([pending]);
     expect(result.mergedPlans).toEqual([pending]);
     expect(loadGuestPlans(storage)).toEqual([guest]);
+  });
+
+  it("replays a pending clear over newer cloud data and removes the marker only after the write succeeds", async () => {
+    const storage = makeStorage();
+    const cleared = makePlan("active-plan", "My Plan", "2026-11-09T00:00:00.000Z");
+    cleared.sectionIds = [];
+    const newerCloud = makePlan("active-plan", "My Plan", "2027-01-01T00:00:00.000Z");
+    storage.setItem("lemon.schedule-plans-owner.v1", "user:account-a");
+    expect(savePendingPlanSyncRecord(storage, "account-a", cleared, "clear-op-1")).toBe(true);
+    const store: CloudScheduleStore = {
+      list: vi.fn().mockResolvedValue([newerCloud]),
+      upsert: vi.fn().mockResolvedValue(undefined),
+      remove: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const result = await syncPlansOnLogin(store, storage, [], "account-a");
+
+    expect(result.mergedPlans).toEqual([cleared]);
+    expect(store.upsert).toHaveBeenCalledWith([cleared]);
+    expect(loadPendingPlanSyncRecords(storage, "account-a")).toEqual([]);
+    expect(loadUserPlans(storage, "account-a")).toEqual([cleared]);
+  });
+
+  it("retains a pending clear marker when its cloud write fails", async () => {
+    const storage = makeStorage();
+    const cleared = { ...makePlan("active-plan", "My Plan"), sectionIds: [] };
+    storage.setItem("lemon.schedule-plans-owner.v1", "user:account-a");
+    expect(savePendingPlanSyncRecord(storage, "account-a", cleared, "clear-op-2")).toBe(true);
+    const store: CloudScheduleStore = {
+      list: vi.fn().mockResolvedValue([makePlan("active-plan", "My Plan", "2027-01-01T00:00:00.000Z")]),
+      upsert: vi.fn().mockRejectedValue(new Error("offline")),
+      remove: vi.fn().mockResolvedValue(undefined),
+    };
+
+    await expect(syncPlansOnLogin(store, storage, [], "account-a")).rejects.toThrow("offline");
+    expect(loadPendingPlanSyncRecords(storage, "account-a")).toEqual([
+      { userId: "account-a", plan: cleared, operationId: "clear-op-2" },
+    ]);
   });
 
   it("never migrates cached plans from a different signed-in account and never auto-merges guest data without consent", async () => {

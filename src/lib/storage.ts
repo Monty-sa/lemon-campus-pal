@@ -12,10 +12,73 @@ export const PLANS_OWNER_STORAGE_KEY = "lemon.schedule-plans-owner.v1";
 export const FILTERS_STORAGE_KEY = "lemon.explorer-filters.v1";
 export const CATEGORY_STORAGE_KEY = "lemon.selected-category.v1";
 export const VIEW_MODE_STORAGE_KEY = "lemon.explorer-view.v1";
+export const PENDING_PLAN_SYNC_KEY = "lemon.pending-plan-sync.v1";
 
 export type ExplorerViewMode = "cards" | "table";
 
 const PlansSchema = z.array(SchedulePlanSchema);
+const PendingPlanSyncRecordSchema = z.object({
+  userId: z.string().min(1),
+  plan: SchedulePlanSchema,
+  operationId: z.string().min(1),
+});
+const PendingPlanSyncRecordsSchema = z.array(PendingPlanSyncRecordSchema);
+export type PendingPlanSyncRecord = z.infer<typeof PendingPlanSyncRecordSchema>;
+
+function readPendingPlanSyncRecords(storage: Pick<Storage, "getItem">): PendingPlanSyncRecord[] {
+  const raw = storage.getItem(PENDING_PLAN_SYNC_KEY);
+  if (!raw) return [];
+  try {
+    return PendingPlanSyncRecordsSchema.parse(JSON.parse(raw));
+  } catch {
+    // Fail closed so corrupted pending deletes cannot be ignored and revived from cloud.
+    throw new Error("Pending schedule sync data is invalid. Local schedule changes were kept.");
+  }
+}
+
+export function loadPendingPlanSyncRecords(
+  storage: Pick<Storage, "getItem">,
+  userId: string,
+): PendingPlanSyncRecord[] {
+  return readPendingPlanSyncRecords(storage).filter((record) => record.userId === userId);
+}
+
+export function savePendingPlanSyncRecord(
+  storage: Pick<Storage, "getItem" | "setItem">,
+  userId: string,
+  plan: SchedulePlan,
+  operationId: string,
+): boolean {
+  try {
+    const record = PendingPlanSyncRecordSchema.parse({ userId, plan, operationId });
+    const records = readPendingPlanSyncRecords(storage).filter(
+      (item) => item.userId !== userId || item.plan.id !== record.plan.id,
+    );
+    storage.setItem(PENDING_PLAN_SYNC_KEY, JSON.stringify([...records, record]));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function removePendingPlanSyncRecord(
+  storage: Pick<Storage, "getItem" | "setItem">,
+  userId: string,
+  planId: string,
+  operationId: string,
+): boolean {
+  try {
+    const records = readPendingPlanSyncRecords(storage);
+    const remaining = records.filter(
+      (item) => item.userId !== userId || item.plan.id !== planId || item.operationId !== operationId,
+    );
+    if (remaining.length === records.length) return false;
+    storage.setItem(PENDING_PLAN_SYNC_KEY, JSON.stringify(remaining));
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export function getUserPlansKey(userId: string): string {
   return `lemon.user.${userId}.plans.v1`;

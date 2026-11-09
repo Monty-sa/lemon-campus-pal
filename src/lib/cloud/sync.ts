@@ -4,11 +4,13 @@ import {
   PLANS_OWNER_STORAGE_KEY,
   loadGuestPlans,
   loadUserPlans,
+  loadPendingPlanSyncRecords,
+  removePendingPlanSyncRecord,
   saveGuestPlans,
   savePlans,
   saveUserPlans,
 } from "../storage";
-import { planCloudMigration, type CloudScheduleStore } from "./schedules";
+import { CLOUD_SCHEDULE_LIMITS, planCloudMigration, type CloudScheduleStore } from "./schedules";
 
 export type SyncResult = {
   mergedPlans: SchedulePlan[];
@@ -90,14 +92,33 @@ export async function syncPlansOnLogin(
     "merge",
   );
 
+  // A pending local write is an explicit user action (including clearing a plan),
+  // so it must win over stale cloud timestamps until the cloud acknowledges it.
+  const pendingPlanWrites = loadPendingPlanSyncRecords(storage, verifiedUserId);
+  const plansById = new Map(migration.plans.map((plan) => [plan.id, plan]));
+  const upsertsById = new Map(migration.upserts.map((plan) => [plan.id, plan]));
+  for (const pending of pendingPlanWrites) {
+    plansById.set(pending.plan.id, pending.plan);
+    upsertsById.set(pending.plan.id, pending.plan);
+  }
+  const mergedPlans = [...plansById.values()];
+  const upserts = [...upsertsById.values()];
+  if (mergedPlans.length > CLOUD_SCHEDULE_LIMITS.maxPlans) {
+    throw new Error(`Pending schedule sync would exceed the ${CLOUD_SCHEDULE_LIMITS.maxPlans}-plan limit. Local plans were kept.`);
+  }
+
   // Cloud writes must succeed before updating authoritative local storage
-  if (migration.upserts.length > 0) {
-    await store.upsert(migration.upserts);
+  if (upserts.length > 0) {
+    await store.upsert(upserts);
+  }
+
+  for (const pending of pendingPlanWrites) {
+    removePendingPlanSyncRecord(storage, verifiedUserId, pending.plan.id, pending.operationId);
   }
 
   // Update user-scoped cache and active storage
-  saveUserPlans(storage, verifiedUserId, migration.plans);
-  savePlans(storage, migration.plans);
+  saveUserPlans(storage, verifiedUserId, mergedPlans);
+  savePlans(storage, mergedPlans);
   storage.setItem(PLANS_OWNER_STORAGE_KEY, `user:${verifiedUserId}`);
 
   const hasUnimportedGuest =
@@ -105,8 +126,8 @@ export async function syncPlansOnLogin(
     localGuestPlans.some((p) => p.sectionIds && p.sectionIds.length > 0);
 
   return {
-    mergedPlans: migration.plans,
-    upsertedCount: migration.upserts.length,
+    mergedPlans,
+    upsertedCount: upserts.length,
     hasUnimportedGuestPlans: hasUnimportedGuest,
   };
 }

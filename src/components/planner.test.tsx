@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { offerings } from "@/data/offerings";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
+import { LANGUAGE_STORAGE_KEY } from "@/lib/i18n/storage";
+import { femaleOfferings } from "@/data/female-offerings";
+import { GUEST_ACTIVE_PLAN_KEY, STORAGE_KEY } from "@/lib/storage";
 import { Planner } from "./planner";
 
 const lightweightAuthTestData = { ...offerings, courses: [], sections: [] };
@@ -47,6 +50,121 @@ describe("English interface", () => {
     const summary = container.querySelector(".section-summary")!;
     expect(summary).toHaveTextContent("Sun");
     expect(summary).toHaveTextContent("Tue");
+  });
+
+  it.each([
+    ["en", "ltr"],
+    ["ar", "rtl"],
+  ] as const)("renders every reported overlapping CRN 66843 meeting as readable, clickable cards in %s", async (lang, direction) => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    const financeSection = offerings.sections.find((section) => section.crn === "66843")!;
+    const internationalEconomics = femaleOfferings.sections.find((section) => section.crn === "75464")!;
+    // Reproduce the owner-reported Mon/Wed overlap while retaining CRN 75464's course identity.
+    const reportedOverlapSection = {
+      ...internationalEconomics,
+      meetings: [
+        { ...internationalEconomics.meetings[0], id: "75464-reported-mon", days: ["mon" as const], startMinutes: 630, endMinutes: 705 },
+        { ...internationalEconomics.meetings[0], id: "75464-reported-wed", days: ["wed" as const], startMinutes: 630, endMinutes: 705 },
+      ],
+    };
+    const internationalCourse = femaleOfferings.courses.find((course) => course.id === internationalEconomics.courseId)!;
+    const testData = {
+      ...offerings,
+      courses: [...offerings.courses.filter((course) => course.id !== internationalCourse.id), internationalCourse],
+      sections: [...offerings.sections.filter((section) => section.id !== financeSection.id), financeSection, reportedOverlapSection],
+    };
+    const now = "2026-11-09T00:00:00.000Z";
+    window.localStorage.setItem("lemon.schedule-plans.v1", JSON.stringify([{
+      id: "reported-overlap-plan",
+      name: "Overlap regression",
+      termId: offerings.term.id,
+      sectionIds: [financeSection.id, reportedOverlapSection.id],
+      createdAt: now,
+      updatedAt: now,
+    }]));
+
+    const { container } = render(<Planner data={testData} />);
+    await waitFor(() => expect(container.querySelectorAll(".class-block")).toHaveLength(5));
+
+    expect(container.querySelector("main")).toHaveAttribute("dir", direction);
+    const financeCards = [...container.querySelectorAll<HTMLButtonElement>(".class-block")]
+      .filter((card) => card.textContent?.includes("0675-102"));
+    const economicsCards = [...container.querySelectorAll<HTMLButtonElement>(".class-block")]
+      .filter((card) => card.textContent?.includes("0678-206"));
+    expect(financeCards).toHaveLength(3);
+    expect(economicsCards).toHaveLength(2);
+    const dayColumns = container.querySelectorAll(".day-column");
+    for (const dayIndex of [1, 3]) { // Monday and Wednesday in the timetable's Sun–Thu order.
+      const cards = [...dayColumns[dayIndex].querySelectorAll<HTMLButtonElement>(".class-block")];
+      expect(cards).toHaveLength(2);
+      expect(cards.map((card) => card.textContent)).toEqual(expect.arrayContaining([
+        expect.stringContaining("0675-102"),
+        expect.stringContaining("0678-206"),
+      ]));
+      expect(cards.map((card) => card.style.insetInlineStart).sort()).toEqual(["calc(0% + 4px)", "calc(50% + 4px)"].sort());
+      for (const card of cards) {
+        expect(card.style.width).toBe("calc(50% - 8px)");
+        expect(card).toHaveAttribute("aria-haspopup", "dialog");
+        expect(card).toHaveClass("has-conflict");
+      }
+    }
+    expect(container.querySelector(".calendar-grid")?.getAttribute("style")).toContain("--calendar-day-min-width: 192px");
+    for (const card of dayColumns[1].querySelectorAll<HTMLButtonElement>(".class-block")) {
+      fireEvent.click(card);
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      fireEvent.keyDown(window, { key: "Escape" });
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    }
+  });
+
+  it.each([
+    ["en", "ltr", "Clear Schedule", "Clear this plan's schedule?", "Confirm", "Cancel", "Undo"],
+    ["ar", "rtl", "إفراغ الجدول", "إفراغ الخطة الحالية؟", "تأكيد", "إلغاء", "تراجع"],
+  ] as const)("clears and undoes only the active guest plan in %s on a narrow viewport", async (lang, direction, clearLabel, dialogTitle, confirmLabel, cancelLabel, undoLabel) => {
+    window.innerWidth = 390;
+    window.dispatchEvent(new Event("resize"));
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    const section = offerings.sections.find((item) => item.crn === "66843")!;
+    const data = {
+      ...offerings,
+      sections: [section],
+      courses: offerings.courses.filter((course) => course.id === section.courseId),
+    };
+    const timestamp = "2026-11-09T00:00:00.000Z";
+    const activePlan = { id: "active-plan", name: "My named plan", termId: offerings.term.id, sectionIds: [section.id], createdAt: timestamp, updatedAt: timestamp };
+    const otherPlan = { id: "other-plan", name: "Keep this plan", termId: offerings.term.id, sectionIds: [section.id], createdAt: timestamp, updatedAt: timestamp };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([activePlan, otherPlan]));
+    window.localStorage.setItem(GUEST_ACTIVE_PLAN_KEY, activePlan.id);
+    const preferences = JSON.stringify({ preferredEarliestMinutes: 600, fewerDays: true });
+    window.localStorage.setItem("lemon.guest.auto-schedule-preferences.v1", preferences);
+
+    const { container } = render(<Planner data={data} supabaseClient={null} />);
+    await waitFor(() => expect(screen.getByRole("textbox", { name: "Plan name" })).toHaveValue(activePlan.name));
+    expect(container.querySelectorAll(".class-block")).toHaveLength(3);
+    expect(container.querySelector("main")).toHaveAttribute("dir", direction);
+
+    fireEvent.click(screen.getByRole("button", { name: clearLabel }));
+    expect(screen.getByRole("dialog", { name: dialogTitle })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: cancelLabel }));
+    expect(container.querySelectorAll(".class-block")).toHaveLength(3);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: clearLabel }));
+    fireEvent.click(screen.getByRole("button", { name: confirmLabel }));
+    await waitFor(() => expect(container.querySelectorAll(".class-block")).toHaveLength(0));
+    const savedPlansAfterClear = JSON.parse(window.localStorage.getItem(STORAGE_KEY)!);
+    expect(savedPlansAfterClear.find((plan: { id: string }) => plan.id === activePlan.id)).toMatchObject({
+      id: activePlan.id,
+      name: activePlan.name,
+      sectionIds: [],
+    });
+    expect(savedPlansAfterClear.find((plan: { id: string }) => plan.id === otherPlan.id)).toEqual(otherPlan);
+    expect(window.localStorage.getItem("lemon.guest.auto-schedule-preferences.v1")).toBe(preferences);
+    expect(screen.getByRole("button", { name: clearLabel })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: undoLabel }));
+    await waitFor(() => expect(container.querySelectorAll(".class-block")).toHaveLength(3));
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY)!).find((plan: { id: string }) => plan.id === activePlan.id).sectionIds).toEqual([section.id]);
   });
 
   it("copies selected CRNs and displays direct schedule download dropdown (LEMON-018)", async () => {

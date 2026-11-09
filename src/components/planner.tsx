@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import Link from "next/link";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { getVerifiedUser, resetPasswordForEmail, signInWithEmail, signInWithGoogle, signOutUser, signUpWithEmail } from "@/lib/cloud/auth";
@@ -9,6 +9,7 @@ import { ensureProfile, updateProfile, type Profile } from "@/lib/cloud/profiles
 import { SupabaseScheduleStore } from "@/lib/cloud/schedules";
 import { importGuestPlansToAccount, restoreGuestPlansOnLogout, syncPlansOnLogin } from "@/lib/cloud/sync";
 import type { Course, DataImport, Day, SchedulePlan, Section } from "@/lib/schema";
+import { layoutOverlappingItems } from "@/lib/meeting-layout";
 import { addSectionToPlan, calculateCredits, findConflicts, formatTime, hasConflictWithSections } from "@/lib/schedule";
 import { EARLIEST_TIME_OPTIONS, LATEST_TIME_OPTIONS } from "@/lib/auto-schedule";
 import {
@@ -22,6 +23,8 @@ import {
   loadSavedFilters,
   loadSavedViewMode,
   loadUserPlans,
+  savePendingPlanSyncRecord,
+  removePendingPlanSyncRecord,
   PLANS_OWNER_STORAGE_KEY,
   saveActivePlanId,
   saveGuestPlans,
@@ -472,9 +475,14 @@ export function Planner({
   const [guestImportModalOpen, setGuestImportModalOpen] = useState(false);
   const [unimportedGuestPlansCount, setUnimportedGuestPlansCount] = useState(0);
   const [unimportedGuestPlans, setUnimportedGuestPlans] = useState<SchedulePlan[]>([]);
+  const [clearScheduleDialogOpen, setClearScheduleDialogOpen] = useState(false);
+  const [clearUndoPlan, setClearUndoPlan] = useState<{ planId: string; sectionIds: string[] } | null>(null);
+  const clearConfirmationInProgressRef = useRef(false);
+  const clearUndoInProgressRef = useRef(false);
 
   const plansRef = useRef(plans);
   const identityGenerationRef = useRef(0);
+  const pendingPlanWritesRef = useRef(new Map<string, Promise<void>>());
   useEffect(() => {
     plansRef.current = plans;
   });
@@ -671,6 +679,12 @@ export function Planner({
 
   const selectedSections = useMemo(() => data.sections.filter((section) => activePlan?.sectionIds.includes(section.id)), [activePlan, data.sections]);
   const conflicts = useMemo(() => findConflicts(selectedSections), [selectedSections]);
+  const calendarDayMinWidth = useMemo(() => Math.max(131, ...days.map((day) => {
+    const dayMeetings = selectedSections.flatMap((section) => section.meetings
+      .filter((meeting) => meeting.days.includes(day.id))
+      .map((meeting) => ({ key: `${section.id}:${meeting.id}`, startMinutes: meeting.startMinutes, endMinutes: meeting.endMinutes })));
+    return Math.max(1, ...layoutOverlappingItems(dayMeetings).map((meeting) => meeting.laneCount)) * 96;
+  })), [selectedSections]);
   const courseMap = useMemo(() => new Map(data.courses.map((course) => [course.id, course])), [data.courses]);
   const colorMap = useMemo(() => new Map(selectedSections.map((section, index) => [section.id, palette[index % palette.length]])), [selectedSections]);
   const filterOptions = useMemo(() => extractFilterOptions(data), [data]);
@@ -770,20 +784,100 @@ export function Planner({
   }
 
   function updateActive(transform: (plan: SchedulePlan) => SchedulePlan) {
+    setClearUndoPlan(null);
     setPlans((current) => {
       const updated = current.map((plan) => (plan.id === activePlanId ? transform(plan) : plan));
       if (user && scheduleStore) {
         const targetPlan = updated.find((p) => p.id === activePlanId);
         if (targetPlan) {
           setSyncStatus("syncing");
-          scheduleStore
-            .upsert([targetPlan])
+          queueCloudPlanWrite(targetPlan)
             .then(() => setSyncStatus("synced"))
             .catch(() => setSyncStatus("error"));
         }
       }
       return updated;
     });
+  }
+
+  function queueCloudPlanWrite(plan: SchedulePlan): Promise<void> {
+    if (!user || !scheduleStore) return Promise.resolve();
+    const previousWrite = pendingPlanWritesRef.current.get(plan.id) ?? Promise.resolve();
+    const currentWrite = previousWrite
+      .catch(() => undefined)
+      .then(() => scheduleStore.upsert([plan]));
+    pendingPlanWritesRef.current.set(plan.id, currentWrite);
+    void currentWrite.then(
+      () => { if (pendingPlanWritesRef.current.get(plan.id) === currentWrite) pendingPlanWritesRef.current.delete(plan.id); },
+      () => { if (pendingPlanWritesRef.current.get(plan.id) === currentWrite) pendingPlanWritesRef.current.delete(plan.id); },
+    );
+    return currentWrite;
+  }
+
+  function recordPendingCloudPlan(plan: SchedulePlan): string | null {
+    if (!user) return null;
+    const operationId = crypto.randomUUID();
+    return savePendingPlanSyncRecord(window.localStorage, user.id, plan, operationId) ? operationId : "";
+  }
+
+  function clearScheduleFromActivePlan() {
+    if (!activePlan || activePlan.sectionIds.length === 0 || clearConfirmationInProgressRef.current) return;
+    clearConfirmationInProgressRef.current = true;
+    const clearedPlan = { ...activePlan, sectionIds: [], updatedAt: new Date().toISOString() };
+    const operationId = recordPendingCloudPlan(clearedPlan);
+    if (user && scheduleStore && !operationId) {
+      clearConfirmationInProgressRef.current = false;
+      setToast(t.planner.clearSchedulePendingError);
+      return;
+    }
+
+    setPlans((current) => current.map((plan) => plan.id === clearedPlan.id ? clearedPlan : plan));
+    setClearUndoPlan({ planId: activePlan.id, sectionIds: [...activePlan.sectionIds] });
+    setClearScheduleDialogOpen(false);
+    setToast(t.planner.clearScheduleDone);
+
+    if (user && scheduleStore && operationId) {
+      setSyncStatus("syncing");
+      void queueCloudPlanWrite(clearedPlan).then(() => {
+        removePendingPlanSyncRecord(window.localStorage, user.id, clearedPlan.id, operationId);
+        setSyncStatus("synced");
+      }).catch(() => {
+        setSyncStatus("error");
+        setToast(t.planner.clearScheduleSyncError);
+      });
+    }
+  }
+
+  function undoClearSchedule() {
+    if (!clearUndoPlan || clearUndoInProgressRef.current) return;
+    const previous = clearUndoPlan;
+    const currentPlan = plans.find((plan) => plan.id === previous.planId);
+    if (!currentPlan) {
+      setClearUndoPlan(null);
+      return;
+    }
+    clearUndoInProgressRef.current = true;
+    const restoredPlan = { ...currentPlan, sectionIds: [...previous.sectionIds], updatedAt: new Date().toISOString() };
+    const operationId = recordPendingCloudPlan(restoredPlan);
+    if (user && scheduleStore && !operationId) {
+      clearUndoInProgressRef.current = false;
+      setToast(t.planner.clearSchedulePendingError);
+      return;
+    }
+
+    setPlans((current) => current.map((plan) => plan.id === restoredPlan.id ? restoredPlan : plan));
+    setClearUndoPlan(null);
+    setToast(t.planner.clearScheduleUndone);
+    if (user && scheduleStore && operationId) {
+      setSyncStatus("syncing");
+      void queueCloudPlanWrite(restoredPlan).then(() => {
+        removePendingPlanSyncRecord(window.localStorage, user.id, restoredPlan.id, operationId);
+        setSyncStatus("synced");
+      }).catch(() => {
+        setSyncStatus("error");
+        setToast(t.planner.clearScheduleSyncError);
+      });
+    }
   }
 
   const [editingPlanName, setEditingPlanName] = useState(() => activePlan?.name ?? "My Plan 1");
@@ -1325,6 +1419,20 @@ export function Planner({
               </select>
               <button className="icon-button" onClick={addPlan} aria-label={t.planner.addPlanAria}><Icon name="plus"/></button>
               <button className="icon-button danger" onClick={deleteActivePlan} disabled={plans.length === 1} aria-label={t.planner.deletePlanAria}><Icon name="trash"/></button>
+              <button
+                type="button"
+                className="clear-schedule-button"
+                disabled={!activePlan || activePlan.sectionIds.length === 0}
+                aria-haspopup="dialog"
+                onClick={() => {
+                  clearConfirmationInProgressRef.current = false;
+                  clearUndoInProgressRef.current = false;
+                  setClearScheduleDialogOpen(true);
+                }}
+              >
+                <Icon name="trash" />
+                <span>{t.planner.clearSchedule}</span>
+              </button>
             </div>
           </div>
 
@@ -1353,7 +1461,10 @@ export function Planner({
           )}
 
           <div className="calendar-shell">
-            <div className="calendar-grid">
+              <div
+                className="calendar-grid"
+                style={{ "--calendar-day-min-width": `${calendarDayMinWidth}px` } as CSSProperties}
+              >
               <div className="calendar-corner">{t.planner.timeCol}</div>
               {days.map((day) => (
                 <div className="day-head" key={day.id}>
@@ -1370,7 +1481,10 @@ export function Planner({
               </div>
               {days.map((day) => (
                 <div className="day-column" key={day.id}>
-                  {selectedSections.flatMap((section) => section.meetings.filter((meeting) => meeting.days.includes(day.id)).map((meeting) => {
+                  {layoutOverlappingItems(selectedSections.flatMap((section) => section.meetings
+                    .filter((meeting) => meeting.days.includes(day.id))
+                    .map((meeting) => ({ section, meeting, key: `${section.id}:${meeting.id}`, startMinutes: meeting.startMinutes, endMinutes: meeting.endMinutes }))))
+                    .map(({ section, meeting, laneIndex, laneCount }) => {
                     const course = courseMap.get(section.courseId)!;
                     const isConflict = conflicts.some((conflict) => conflict.day === day.id && [conflict.firstSectionId, conflict.secondSectionId].includes(section.id));
                     const top = ((meeting.startMinutes - 420) / 60) * 72;
@@ -1386,8 +1500,15 @@ export function Planner({
                           setSelectedCalendarSection(section);
                         }}
                         className={`class-block ${colorMap.get(section.id)} ${isConflict ? "has-conflict" : ""}`}
-                        style={{ top, height }}
+                        style={{
+                          top,
+                          height,
+                          insetInlineStart: `calc(${laneIndex * 100 / laneCount}% + 4px)`,
+                          insetInlineEnd: "auto",
+                          width: `calc(${100 / laneCount}% - 8px)`,
+                        }}
                         data-compact={height <= 44 ? "true" : undefined}
+                        data-lane-count={laneCount}
                         key={`${meeting.id}-${day.id}`}
                       >
                         <b><bdi dir="ltr">{course.code}</bdi></b>
@@ -1395,7 +1516,7 @@ export function Planner({
                         <small><bdi dir="ltr">{formatTime(meeting.startMinutes)} – {formatTime(meeting.endMinutes)}</bdi></small>
                       </button>
                     );
-                  }))}
+                  })}
                 </div>
               ))}
             </div>
@@ -3141,7 +3262,86 @@ export function Planner({
         showToast={setToast}
       />
 
-      {toast && <div className="toast" role="status">{toast}</div>}
+      {clearScheduleDialogOpen && activePlan && (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onClick={() => {
+            clearConfirmationInProgressRef.current = false;
+            setClearScheduleDialogOpen(false);
+          }}
+        >
+          <div
+            className="auth-modal clear-schedule-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="clear-schedule-title"
+            aria-describedby="clear-schedule-message"
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                clearConfirmationInProgressRef.current = false;
+                setClearScheduleDialogOpen(false);
+              }
+            }}
+          >
+            <header className="auth-modal-header">
+              <div>
+                <h2 id="clear-schedule-title">{t.planner.clearScheduleDialogTitle}</h2>
+                <p id="clear-schedule-message">{t.planner.clearScheduleDialogMessage}</p>
+              </div>
+              <button
+                type="button"
+                className="close-button"
+                aria-label={t.common.close}
+                onClick={() => {
+                  clearConfirmationInProgressRef.current = false;
+                  setClearScheduleDialogOpen(false);
+                }}
+              >
+                <Icon name="x" />
+              </button>
+            </header>
+            <footer className="auth-modal-footer course-details-footer">
+              <div className="course-details-actions">
+                <button
+                  type="button"
+                  className="admin-btn danger"
+                  onClick={clearScheduleFromActivePlan}
+                >
+                  {t.planner.clearScheduleConfirm}
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn secondary"
+                  onClick={() => {
+                    clearConfirmationInProgressRef.current = false;
+                    setClearScheduleDialogOpen(false);
+                  }}
+                >
+                  {t.common.cancel}
+                </button>
+              </div>
+            </footer>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className={`toast ${clearUndoPlan ? "toast-with-action" : ""}`}>
+          <span role="status">{toast}</span>
+          {clearUndoPlan && (
+            <button
+              type="button"
+              className="toast-action"
+              aria-label={t.planner.clearScheduleUndo}
+              onClick={undoClearSchedule}
+            >
+              {t.planner.clearScheduleUndo}
+            </button>
+          )}
+        </div>
+      )}
     </main>
   );
 }

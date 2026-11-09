@@ -24,6 +24,9 @@ import {
   exportGuestBackup,
   STORAGE_KEY,
   VIEW_MODE_STORAGE_KEY,
+  loadPendingPlanSyncRecords,
+  savePendingPlanSyncRecord,
+  removePendingPlanSyncRecord,
 } from "./storage";
 
 const plans: SchedulePlan[] = ["First plan", "Second plan"].map((name, index) => ({
@@ -36,6 +39,25 @@ const plans: SchedulePlan[] = ["First plan", "Second plan"].map((name, index) =>
 }));
 
 describe("plan and preferences persistence (MANDATORY GUEST-FIRST POLICY)", () => {
+  it("keeps pending cloud plan writes isolated by account and removes only the acknowledged operation", () => {
+    const values = new Map<string, string>();
+    const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value) };
+    const clearedPlan = { ...plans[1], sectionIds: [], updatedAt: "2026-11-09T00:00:00.000Z" };
+    const anotherUserPlan = { ...plans[0], sectionIds: ["private-section"] };
+
+    expect(savePendingPlanSyncRecord(storage, "user-a", clearedPlan, "clear-op-a")).toBe(true);
+    expect(savePendingPlanSyncRecord(storage, "user-b", anotherUserPlan, "clear-op-b")).toBe(true);
+    expect(loadPendingPlanSyncRecords(storage, "user-a")).toEqual([
+      { userId: "user-a", plan: clearedPlan, operationId: "clear-op-a" },
+    ]);
+    expect(removePendingPlanSyncRecord(storage, "user-a", clearedPlan.id, "wrong-op")).toBe(false);
+    expect(removePendingPlanSyncRecord(storage, "user-a", clearedPlan.id, "clear-op-a")).toBe(true);
+    expect(loadPendingPlanSyncRecords(storage, "user-a")).toEqual([]);
+    expect(loadPendingPlanSyncRecords(storage, "user-b")).toEqual([
+      { userId: "user-b", plan: anotherUserPlan, operationId: "clear-op-b" },
+    ]);
+  });
+
   it("round-trips multiple plans", () => {
     const values = new Map<string, string>();
     const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value) };

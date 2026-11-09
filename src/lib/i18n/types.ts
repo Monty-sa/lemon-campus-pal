@@ -87,6 +87,15 @@ export interface PlannerTranslations {
   downloadIcs: string;
   downloadCsv: string;
   clearAllSections: string;
+  clearSchedule: string;
+  clearScheduleDialogTitle: string;
+  clearScheduleDialogMessage: string;
+  clearScheduleConfirm: string;
+  clearScheduleUndo: string;
+  clearScheduleDone: string;
+  clearScheduleUndone: string;
+  clearScheduleSyncError: string;
+  clearSchedulePendingError: string;
   deleteThisPlan: string;
   totalCredits: string;
   totalSections: string;
