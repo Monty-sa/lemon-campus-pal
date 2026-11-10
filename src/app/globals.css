@@ -15,7 +15,7 @@
   --on-lemon: #344000;
   --danger: #c8453b;
   --radius: 20px;
-  --font-sans: "Thmanyah Sans", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-sans: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, system-ui, sans-serif;
   --font-serif-display: "Thmanyah Serif Display", "Amiri", Georgia, "Times New Roman", serif;
   --font-serif-text: "Thmanyah Serif Text", "Amiri", Georgia, serif;
   --shadow-soft: 0 18px 48px rgba(24, 63, 46, .07);
@@ -250,6 +250,14 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+
+main.student-planner[lang="ar"],
+main.gpa-page[lang="ar"] {
+  --font-sans: "Thmanyah Sans", "Segoe UI", Arial, system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+}
+
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:focus-visible, select:focus-visible {

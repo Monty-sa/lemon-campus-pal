@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { LANGUAGE_INIT_SCRIPT } from "@/lib/i18n";
+import { thmanyahSans } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html lang="en" dir="ltr" className={thmanyahSans.variable} suppressHydrationWarning>
       <head>
         <meta name="color-scheme" content="light dark" />
       </head>

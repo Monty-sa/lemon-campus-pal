@@ -1162,7 +1162,7 @@ export function Planner({
   const credits = calculateCredits(selectedSections, data.courses);
 
   return (
-    <main dir={getLanguageDirection(lang)} lang={lang}>
+    <main className="student-planner" dir={getLanguageDirection(lang)} lang={lang}>
       <header className="topbar">
         <a className="brand" href="#top" aria-label={lang === "ar" ? "ليمون الرئيسية" : "LEMON home"}>
           <span className="brand-fruit"><span>LE</span><b>MON</b></span>

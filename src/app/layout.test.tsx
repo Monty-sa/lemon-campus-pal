@@ -1,4 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/font/local", () => ({
+  default: () => ({ variable: "thmanyah-font-variable" }),
+}));
 import RootLayout, { metadata } from "./layout";
 
 describe("RootLayout (LEMON-035 Phase 1)", () => {
@@ -22,5 +26,6 @@ describe("RootLayout (LEMON-035 Phase 1)", () => {
     expect(element.props.suppressHydrationWarning).toBe(true);
     expect(element.props.dir).toBe("ltr");
     expect(element.props.lang).toBe("en");
+    expect(element.props.className).toBe("thmanyah-font-variable");
   });
 });
