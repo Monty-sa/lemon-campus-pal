@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/font/local", () => ({
-  default: () => ({ variable: "thmanyah-font-variable" }),
+  default: () => ({ variable: "niner-font-variable" }),
 }));
 import RootLayout, { metadata } from "./layout";
 
@@ -26,6 +26,6 @@ describe("RootLayout (LEMON-035 Phase 1)", () => {
     expect(element.props.suppressHydrationWarning).toBe(true);
     expect(element.props.dir).toBe("ltr");
     expect(element.props.lang).toBe("en");
-    expect(element.props.className).toBe("thmanyah-font-variable");
+    expect(element.props.className).toBe("niner-font-variable");
   });
 });

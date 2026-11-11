@@ -253,7 +253,7 @@ body {
 
 main.student-planner[lang="ar"],
 main.gpa-page[lang="ar"] {
-  --font-sans: "Thmanyah Sans", "Segoe UI", Arial, system-ui, sans-serif;
+  --font-sans: "Niner Font", "Segoe UI", Arial, system-ui, sans-serif;
   font-family: var(--font-sans);
   font-synthesis: none;
 }

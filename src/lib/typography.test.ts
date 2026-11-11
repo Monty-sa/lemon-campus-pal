@@ -4,19 +4,19 @@ import { describe, expect, it } from "vitest";
 
 const projectRoot = process.cwd();
 const fontAssets = [
-  ["thmanyahsans-Light.woff2", "300"],
-  ["thmanyahsans-Regular.woff2", "400"],
-  ["thmanyahsans-Medium.woff2", "500"],
-  ["thmanyahsans-Bold.woff2", "700"],
-  ["thmanyahsans-Black.woff2", "900"],
+  ["niner-font-light.woff2", "300"],
+  ["niner-font-regular.woff2", "400"],
+  ["niner-font-medium.woff2", "500"],
+  ["niner-font-bold.woff2", "700"],
+  ["niner-font-black.woff2", "900"],
 ] as const;
 
 describe("Arabic student typography", () => {
-  it("registers all five local Thmanyah Sans weights", () => {
+  it("registers all five local Niner Font weights", () => {
     const configPath = resolve(projectRoot, "src/app/fonts.ts");
     expect(existsSync(configPath)).toBe(true);
     const config = existsSync(configPath) ? readFileSync(configPath, "utf8") : "";
-    expect(config).toContain('prop: "font-family", value: "Thmanyah Sans"');
+    expect(config).toContain('prop: "font-family", value: "Niner Font"');
 
     for (const [file, weight] of fontAssets) {
       expect(existsSync(resolve(projectRoot, "src/fonts", file))).toBe(true);
@@ -29,10 +29,10 @@ describe("Arabic student typography", () => {
     const css = readFileSync(resolve(projectRoot, "src/app/globals.css"), "utf8");
     expect(css).toContain('main.student-planner[lang="ar"]');
     expect(css).toContain('main.gpa-page[lang="ar"]');
-    expect(css).toContain('--font-sans: "Thmanyah Sans"');
+    expect(css).toContain('--font-sans: "Niner Font"');
     expect(css).toContain("font-synthesis: none");
     const baseFontStack = css.match(/:root\s*\{([^}]*)\}/)?.[1] ?? "";
     expect(baseFontStack).toMatch(/--font-sans:\s*"Segoe UI"/);
-    expect(baseFontStack).not.toMatch(/--font-sans:\s*"Thmanyah Sans"/);
+    expect(baseFontStack).not.toMatch(/--font-sans:\s*"Niner Font"/);
   });
 });
